@@ -5,7 +5,7 @@ import entity.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import static entity.Status.DONE;
+import static entity.Status.*;
 
 public class Main {
     private static Manager manager = new Manager();
