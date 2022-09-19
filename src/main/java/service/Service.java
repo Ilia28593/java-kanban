@@ -14,11 +14,13 @@ public class Service {
     static NewRepository newRepository = new NewRepository();
 
     private static TaskInter getTaskById(int id) {
-        Optional<DefaultTask> defaultTask = NewRepository.getDefaultTaskList().stream().filter(t -> t.getId() == id).findFirst();
+        Optional<DefaultTask> defaultTask = NewRepository.getDefaultTaskList().stream()
+                .filter(t -> t.getId() == id).findFirst();
         if (defaultTask.isPresent()) {
             return defaultTask.get();
         } else {
-            Optional<EpicTask> epicTask = NewRepository.getEpicTaskList().stream().filter(t -> t.getId() == id).findFirst();
+            Optional<EpicTask> epicTask = NewRepository.getEpicTaskList().stream()
+                    .filter(t -> t.getId() == id).findFirst();
             if (epicTask.isPresent()) {
                 return epicTask.get();
             } else {
