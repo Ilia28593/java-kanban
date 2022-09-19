@@ -1,7 +1,7 @@
-package entity;
+package model;
 
 public enum Status {
     NEW,
-    IN_PROGRESS,
+    InPROGRESS,
     DONE
 }
