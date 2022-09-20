@@ -1,17 +1,31 @@
 package model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
-public abstract class Task {
+@NoArgsConstructor
+public class Task extends id {
     protected String nameTask;
     protected String taskDetail;
     protected Status status;
-    private static int ids;
-    protected int id;
 
-    public Task() {
-        ids++;
-        this.id = ids;
+    public Task(String nameTask, String taskDetail, Status status) {
+        super();
+        this.nameTask = nameTask;
+        this.taskDetail = taskDetail;
+        this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return "DefaultTask{" +
+                "nameTask='" + nameTask + '\'' +
+                ", taskDetail='" + taskDetail + '\'' +
+                ", status=" + status +
+                ", id=" + id +
+                '}';
     }
 }

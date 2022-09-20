@@ -7,15 +7,21 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-public class DefaultTask extends Task implements TaskInter {
+public class SubTask extends Task {
+    private int epicId;
+
+    public SubTask(String nameTask, String taskDetail, Status status) {
+        super(nameTask, taskDetail, status);
+    }
 
     @Override
     public String toString() {
-        return "DefaultTask{" +
-                "nameTask='" + nameTask + '\'' +
+        return "Subtask{" +
+                "id=" + id +
+                ", epicId=" + epicId +
+                ", nameTask='" + nameTask + '\'' +
                 ", taskDetail='" + taskDetail + '\'' +
                 ", status=" + status +
-                ", id=" + id +
                 '}';
     }
 }

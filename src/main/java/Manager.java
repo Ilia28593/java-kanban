@@ -1,15 +1,18 @@
-import model.*;
-import repository.NewRepository;
+import model.EpicTask;
+import model.Status;
+import model.SubTask;
+import model.Task;
+import repository.Repository;
 import service.TaskManager;
 
 public class Manager {
-    TaskManager taskManager = new TaskManager();
-    NewRepository repository = new NewRepository();
+    private final TaskManager taskManager = new TaskManager();
+    private final Repository repository = new Repository();
 
 
     public void printAllElement() {
         if (repository.getDefaultTaskList() != null) {
-            for (DefaultTask task : repository.getDefaultTaskList()) {
+            for (Task task : repository.getDefaultTaskList()) {
                 System.out.println(task);
             }
         }
@@ -19,26 +22,50 @@ public class Manager {
             }
         }
         if (repository.getSubtaskList() != null) {
-            for (Subtask epicTasks : repository.getSubtaskList()) {
+            for (SubTask epicTasks : repository.getSubtaskList()) {
                 System.out.println(epicTasks);
             }
         }
     }
 
-    public void addEpicDefaultTask(TaskInter tasks) {
-        taskManager.setAllTasksInRepository(tasks);
+    public void addEpicTask(EpicTask tasks) {
+        taskManager.addEpicTask(tasks);
     }
 
-    public void addSubTask(EpicTask epicTask, Subtask subtask) {
-        taskManager.addSubTask(epicTask, subtask);
+    public void addSubTask(EpicTask epicTask, SubTask tasks) {
+        taskManager.addSubTask(epicTask, tasks);
     }
 
-    public void changeStatus(int id, Status status) {
-        taskManager.changeStatus(id, status);
+    public void addTask(Task tasks) {
+        taskManager.addTask(tasks);
     }
 
-    public void remove(int id) {
-        taskManager.removeFromID(id);
+    public void changeTaskStatus(int id, Status status) {
+        taskManager.changeTaskStatus(id, status);
+    }
+
+    public void changeEpicStatus(int id, Status status) {
+        if (status.equals(Status.IN_PROGRESS) || status.equals(Status.NEW)) {
+            taskManager.changeEpicStatus(id, status);
+        } else {
+            System.out.println("Статус поменяется на Done автоматически, после выполнения всех SubTask ");
+        }
+    }
+
+    public void changeSubTaskStatus(int id, Status status) {
+        taskManager.changeSubtaskStatus(id, status);
+    }
+
+    public void removeTask(int id) {
+        taskManager.removeTaskID(id);
+    }
+
+    public void removeEpic(int id) {
+        taskManager.removeEpicID(id);
+    }
+
+    public void removeSubTask(int id) {
+        taskManager.removeSubTaskID(id);
     }
 }
 

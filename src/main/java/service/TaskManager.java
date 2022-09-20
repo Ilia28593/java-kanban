@@ -1,7 +1,10 @@
 package service;
 
-import model.*;
-import repository.NewRepository;
+import model.EpicTask;
+import model.Status;
+import model.SubTask;
+import model.Task;
+import repository.Repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,146 +12,128 @@ import java.util.function.Predicate;
 
 public class TaskManager {
 
-    static NewRepository newRepository = new NewRepository();
+    private final Repository repository = new Repository();
 
-    private TaskInter getTaskById(int id) {
-        Optional<DefaultTask> defaultTask = newRepository.getDefaultTaskList().stream()
+    private Task getTaskById(int id) {
+        Optional<Task> defaultTask = repository.getDefaultTaskList().stream()
                 .filter(t -> t.getId() == id).findFirst();
-        Optional<EpicTask> epicTask = newRepository.getEpicTaskList().stream()
+        return defaultTask.orElse(null);
+    }
+
+    private SubTask getSubTaskById(int id) {
+        Optional<SubTask> subtask = repository.getSubtaskList().stream()
                 .filter(t -> t.getId() == id).findFirst();
-        Optional<Subtask> subtask = newRepository.getSubtaskList().stream()
+        return subtask.orElse(null);
+    }
+
+    private EpicTask getEpicTaskById(int id) {
+        Optional<EpicTask> epicTask = repository.getEpicTaskList().stream()
                 .filter(t -> t.getId() == id).findFirst();
-        if (defaultTask.isPresent()) {
-            return defaultTask.get();
-        } else if (epicTask.isPresent()) {
-            return epicTask.get();
-        } else if (subtask.isPresent()) {
-            return subtask.get();
-        } else {
-            System.out.println("*** НЕТ");
-        }
-        return null;
+        return epicTask.orElse(null);
     }
 
-    public List<? extends TaskInter> getTaskTypes(String type) {
-        List<? extends TaskInter> contain = null;
-        switch (type) {
-            case "DEFAULT": {
-                contain = newRepository.getDefaultTaskList();
-                break;
-            }
-            case "EPIC": {
-                contain = newRepository.getEpicTaskList();
-                break;
-            }
-            case "SUBTASK": {
-                contain = newRepository.getSubtaskList();
-                break;
-            }
-        }
-        return contain;
+    public List<Task> getTaskTypes() {
+        return repository.getDefaultTaskList();
     }
 
-    public void updateEpicDefaultTask(Integer id, String newName, String newDetails, Status newStatus) {
-        TaskInter taskFromId = getTaskById(id);
-        if (taskFromId != null) {
-            if (taskFromId instanceof DefaultTask) {
-                ((DefaultTask) taskFromId)
-                        .setNameTask(newName != null ? newName : ((DefaultTask) taskFromId)
-                                .getNameTask());
-                ((DefaultTask) taskFromId)
-                        .setTaskDetail(newDetails != null ? newDetails : ((DefaultTask) taskFromId)
-                                .getTaskDetail());
-                ((DefaultTask) taskFromId)
-                        .setStatus(newStatus != null ? newStatus : ((DefaultTask) taskFromId)
-                                .getStatus());
-            }
-        }
+    public List<EpicTask> getEpicTaskTypes() {
+        return repository.getEpicTaskList();
     }
 
-    public void updateSubtaskTask(Integer id, String newName, String newDetails, Status newStatus, int perentId) {
-        TaskInter taskFromId = getTaskById(id);
-        if (taskFromId != null) {
-            if (taskFromId instanceof Subtask) {
-                ((Subtask) taskFromId)
-                        .setNameTask(newName != null ? newName : ((Subtask) taskFromId)
-                                .getNameTask());
-                ((Subtask) taskFromId)
-                        .setTaskDetail(newDetails != null ? newDetails : ((Subtask) taskFromId)
-                                .getTaskDetail());
-                ((Subtask) taskFromId)
-                        .setStatus(newStatus != null ? newStatus : ((Subtask) taskFromId)
-                                .getStatus());
-                ((Subtask) taskFromId)
-                        .setEpicId(perentId != 0 ? perentId : ((Subtask) taskFromId).getEpicId());
-            }
-        }
+    public List<SubTask> getSubTaskTypes() {
+        return repository.getSubtaskList();
     }
 
-    public void changeStatus(Integer id, Status status) {
-        TaskInter taskFromId = getTaskById(id);
-        if (taskFromId instanceof EpicTask) {
-            if (status.equals(Status.IN_PROGRESS) && ((EpicTask) taskFromId).getStatus().equals(Status.NEW)) {
-                ((EpicTask) taskFromId).setStatus(status);
-                if (!(((EpicTask) taskFromId).getIdSubtasks() == null)) {
-                    for (Integer idSubtask : ((EpicTask) taskFromId).getIdSubtasks()) {
-                        Subtask subtask = (Subtask) getTaskById(idSubtask);
-                        assert subtask != null;
-                        subtask.setStatus(Status.IN_PROGRESS);
-                    }
+    public void updateTask(Task task, Task newTask) {
+        task.setNameTask(newTask.getNameTask() != null ? newTask.getNameTask() : task.getNameTask());
+        task.setTaskDetail(newTask.getTaskDetail() != null ? newTask.getTaskDetail() : task.getTaskDetail());
+        task.setStatus(newTask.getStatus() != null ? newTask.getStatus() : task.getStatus());
+    }
+
+    public void updateEpicTask(EpicTask task, EpicTask newTask) {
+        task.setNameTask(newTask.getNameTask() != null ? newTask.getNameTask() : task.getNameTask());
+        task.setTaskDetail(newTask.getTaskDetail() != null ? newTask.getTaskDetail() : task.getTaskDetail());
+        task.setStatus(newTask.getStatus() != null ? newTask.getStatus() : task.getStatus());
+    }
+
+    public void updateSubtaskTask(SubTask task, SubTask newSubTask) {
+        task.setNameTask(newSubTask.getNameTask() != null ? newSubTask.getNameTask() : task.getNameTask());
+        task.setTaskDetail(newSubTask.getTaskDetail() != null ? newSubTask.getTaskDetail() : task.getTaskDetail());
+        task.setStatus(newSubTask.getStatus() != null ? newSubTask.getStatus() : task.getStatus());
+        task.setEpicId(newSubTask.getEpicId() != 0 ? newSubTask.getEpicId() : task.getEpicId());
+    }
+
+    public void changeSubtaskStatus(Integer id, Status status) {
+        SubTask subTask = (SubTask) getSubTaskById(id);
+        subTask.setStatus(status);
+        int epicId = subTask.getEpicId();
+        searchStatusDoneInChild(getEpicTaskById(epicId));
+    }
+
+
+    public void changeEpicStatus(Integer id, Status status) {
+        EpicTask epicTask = getEpicTaskById(id);
+        if (status.equals(Status.IN_PROGRESS) && epicTask.getStatus().equals(Status.NEW)) {
+            epicTask.setStatus(status);
+            if (epicTask.getSubtaskIds() != null) {
+                for (Integer idSubtask : epicTask.getSubtaskIds()) {
+                    SubTask subtask = (SubTask) getSubTaskById(idSubtask);
+                    subtask.setStatus(Status.IN_PROGRESS);
                 }
             }
-        } else if (taskFromId instanceof DefaultTask) {
-            ((DefaultTask) taskFromId).setStatus(status);
-        } else if (taskFromId instanceof Subtask) {
-            ((Subtask) taskFromId).setStatus(status);
-            int epicId = ((Subtask) taskFromId).getEpicId();
-            searchStatusDoneInChild(getTaskById(epicId));
-        }
-    }
-
-    public void searchStatusDoneInChild(TaskInter task) {
-        if (task instanceof EpicTask) {
-            EpicTask epicTask = (EpicTask) task;
-
-            boolean checkAllSubtaskIsDone = newRepository.getSubtaskList().stream()
-                    .filter(t -> epicTask.getIdSubtasks().contains(t.getId()))
-                    .map(Subtask::getStatus)
-                    .allMatch(Predicate.isEqual(Status.DONE));
-
-            if (checkAllSubtaskIsDone) {
-                epicTask.setStatus(Status.DONE);
+        } else if (status.equals(Status.NEW)) {
+            epicTask.setStatus(status);
+            if (epicTask.getSubtaskIds() != null) {
+                for (Integer idSubtask : epicTask.getSubtaskIds()) {
+                    SubTask subtask = (SubTask) getTaskById(idSubtask);
+                    subtask.setStatus(Status.NEW);
+                }
             }
         }
     }
 
-    public void removeFromID(Integer id) {
-        TaskInter taskFromId = getTaskById(id);
-        if (taskFromId != null) {
-            if (taskFromId instanceof DefaultTask) {
-                newRepository.getDefaultTaskList().remove(taskFromId);
-            } else if (taskFromId instanceof EpicTask) {
-                newRepository.getEpicTaskList().remove(taskFromId);
-            } else if (taskFromId instanceof Subtask) {
-                newRepository.getSubtaskList().remove(taskFromId);
-            }
+    public void changeTaskStatus(Integer id, Status status) {
+        Task task = getTaskById(id);
+        task.setStatus(status);
+    }
+
+    public void searchStatusDoneInChild(EpicTask task) {
+        boolean checkAllSubtaskIsDone = repository.getSubtaskList().stream()
+                .filter(t -> task.getSubtaskIds().contains(t.getId()))
+                .map(SubTask::getStatus)
+                .allMatch(Predicate.isEqual(Status.DONE));
+
+        if (checkAllSubtaskIsDone) {
+            task.setStatus(Status.DONE);
         }
     }
 
-
-    public void setAllTasksInRepository(TaskInter task) {
-        if (task != null) {
-            if (task instanceof DefaultTask) {
-                newRepository.setDefaultTaskList((DefaultTask) task);
-            } else if (task instanceof EpicTask) {
-                newRepository.setEpicTaskList((EpicTask) task);
-            }
-        }
+    public void removeTaskID(Integer id) {
+        Task taskFromId = getTaskById(id);
+        repository.getDefaultTaskList().remove(taskFromId);
     }
 
-    public void addSubTask(EpicTask epicTask, Subtask subtask) {
-        epicTask.setIdSubtasks(subtask);
-        newRepository.setSubtaskList(subtask);
+    public void removeSubTaskID(Integer id) {
+        SubTask taskFromId = getSubTaskById(id);
+        repository.getSubtaskList().remove(taskFromId);
+    }
+
+    public void removeEpicID(Integer id) {
+        EpicTask taskFromId = getEpicTaskById(id);
+        repository.getEpicTaskList().remove(taskFromId);
+    }
+
+    public void addTask(Task task) {
+        repository.addDefaultTaskList(task);
+    }
+
+    public void addEpicTask(EpicTask epicTask) {
+        repository.addEpicTaskList(epicTask);
+    }
+
+    public void addSubTask(EpicTask epicTask, SubTask subtask) {
+        epicTask.addSubtask(subtask);
+        repository.addSubtaskList(subtask);
     }
 }
 
