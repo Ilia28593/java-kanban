@@ -2,13 +2,23 @@ package repository;
 
 import model.DefaultTask;
 import model.EpicTask;
+import model.Subtask;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class NewRepository {
-    private static List<DefaultTask> defaultTaskList = new ArrayList<>();
-    private static List<EpicTask> epicTaskList = new ArrayList<>();
+    private static final List<DefaultTask> defaultTaskList = new ArrayList<>();
+    private static final List<EpicTask> epicTaskList = new ArrayList<>();
+    private static final List<Subtask> subtaskList = new ArrayList<>();
+
+    public  List<Subtask> getSubtaskList() {
+        return subtaskList;
+    }
+
+    public void setSubtaskList(Subtask subtaskList) {
+        NewRepository.subtaskList.add(subtaskList);
+    }
 
     public void setDefaultTaskList(DefaultTask defaultTaskList) {
         NewRepository.defaultTaskList.add(defaultTaskList);
@@ -18,11 +28,11 @@ public class NewRepository {
         NewRepository.epicTaskList.add(epicTaskList);
     }
 
-    public static List<DefaultTask> getDefaultTaskList() {
+    public  List<DefaultTask> getDefaultTaskList() {
         return defaultTaskList;
     }
 
-    public static List<EpicTask> getEpicTaskList() {
+    public List<EpicTask> getEpicTaskList() {
         return epicTaskList;
     }
 }

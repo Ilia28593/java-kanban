@@ -1,6 +1,5 @@
 package model;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -8,11 +7,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
-public class DefaultTask extends SetId implements TaskInter {
-    private String nameTask;
-    private String taskDetail;
-    private Status status;
+public class DefaultTask extends Task implements TaskInter {
 
     @Override
     public String toString() {

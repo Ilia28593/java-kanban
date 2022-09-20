@@ -1,45 +1,44 @@
 import model.*;
 import repository.NewRepository;
-import service.Service;
-
-import java.util.List;
+import service.TaskManager;
 
 public class Manager {
-    private static final Service service = new Service();
+    TaskManager taskManager = new TaskManager();
+    NewRepository repository = new NewRepository();
 
 
     public void printAllElement() {
-        List<DefaultTask> defaultTasks = NewRepository.getDefaultTaskList();
-        if (defaultTasks != null) {
-            for (DefaultTask task : defaultTasks) {
+        if (repository.getDefaultTaskList() != null) {
+            for (DefaultTask task : repository.getDefaultTaskList()) {
                 System.out.println(task);
             }
         }
-        List<EpicTask> epicTask = NewRepository.getEpicTaskList();
-        if (epicTask != null) {
-            for (EpicTask epicTasks : epicTask) {
+        if (repository.getEpicTaskList() != null) {
+            for (EpicTask epicTasks : repository.getEpicTaskList()) {
                 System.out.println(epicTasks);
-                for (Subtask subtaskTasks : epicTasks.getSubtask()) {
-                    System.out.println(subtaskTasks);
-                }
+            }
+        }
+        if (repository.getSubtaskList() != null) {
+            for (Subtask epicTasks : repository.getSubtaskList()) {
+                System.out.println(epicTasks);
             }
         }
     }
 
-    public void addEpicDefaultTask(List<TaskInter> tasks) {
-        service.setAllTasksInRepository(tasks);
+    public void addEpicDefaultTask(TaskInter tasks) {
+        taskManager.setAllTasksInRepository(tasks);
     }
 
     public void addSubTask(EpicTask epicTask, Subtask subtask) {
-        service.addSubTask(epicTask, subtask);
+        taskManager.addSubTask(epicTask, subtask);
     }
 
     public void changeStatus(int id, Status status) {
-        service.changeStatus(id, status);
+        taskManager.changeStatus(id, status);
     }
 
     public void remove(int id) {
-        service.removeFromID(id);
+        taskManager.removeFromID(id);
     }
 }
 

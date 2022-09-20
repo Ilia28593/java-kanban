@@ -7,11 +7,8 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-public class Subtask extends SetId implements TaskInter {
+public class Subtask extends Task implements TaskInter {
     private int epicId;
-    private String nameTask;
-    private String taskDetail;
-    private Status status;
 
     public Subtask(String nameTask, String taskDetail, Status status) {
         this.nameTask = nameTask;

@@ -1,13 +1,12 @@
-import model.*;
-
-import java.util.ArrayList;
-import java.util.List;
+import model.EpicTask;
+import model.Status;
+import model.Subtask;
 
 import static model.Status.DONE;
-import static model.Status.InPROGRESS;
+import static model.Status.IN_PROGRESS;
 
 public class Main {
-    private static Manager manager = new Manager();
+    private static final Manager manager = new Manager();
 
     public static void main(String[] args) {
 
@@ -19,20 +18,16 @@ public class Main {
         EpicTask birthday = new EpicTask("Празднование ДР", "Организовать вкусную еду", Status.NEW);
         Subtask birthday1 = new Subtask("Посчитать количество гостей", "Сделать рассадку", Status.NEW);
 
-        List<TaskInter> tasks = new ArrayList<>() {{
-            add(draiving);
-            add(birthday);
-        }};
 
-
-        manager.addEpicDefaultTask(tasks);
+        manager.addEpicDefaultTask(draiving);
         manager.addSubTask(draiving, draiving1);
         manager.addSubTask(draiving, draiving2);
+        manager.addEpicDefaultTask(birthday);
         manager.addSubTask(birthday, birthday1);
         manager.printAllElement();
         System.out.println("-----------------------------------------------");
 
-        manager.changeStatus(1, InPROGRESS);
+        manager.changeStatus(1, IN_PROGRESS);
         manager.printAllElement();
         System.out.println("-----------------------------------------------");
 

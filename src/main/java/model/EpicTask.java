@@ -10,12 +10,9 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-public class EpicTask extends SetId implements TaskInter {
-    private String nameTask;
-    private String taskDetail;
-    private Status status;
+public class EpicTask extends Task implements TaskInter {
 
-    private List<Subtask> subtask = new ArrayList<>();
+    private List<Integer> idSubtasks = new ArrayList<>();
 
     public EpicTask(String nameTask, String taskDetail, Status status) {
         this.nameTask = nameTask;
@@ -23,9 +20,9 @@ public class EpicTask extends SetId implements TaskInter {
         this.status = status;
     }
 
-    public void setSubtask(Subtask subtask) {
-        subtask.setEpicId(this.id);
-        this.subtask.add(subtask);
+    public void setIdSubtasks(Subtask idSubtasks) {
+        idSubtasks.setEpicId(this.id);
+        this.idSubtasks.add(idSubtasks.id);
     }
 
     @Override
@@ -35,7 +32,7 @@ public class EpicTask extends SetId implements TaskInter {
                 ", nameTask='" + nameTask + '\'' +
                 ", taskDetail='" + taskDetail + '\'' +
                 ", status=" + status +
-                ", subtask=" + subtask.size() +
+                ", subtask=" + idSubtasks +
                 '}';
     }
 }
