@@ -11,20 +11,8 @@ public class Manager {
 
 
     public void printAllElement() {
-        if (repository.getDefaultTaskList() != null) {
-            for (Task task : repository.getDefaultTaskList()) {
-                System.out.println(task);
-            }
-        }
-        if (repository.getEpicTaskList() != null) {
-            for (EpicTask epicTasks : repository.getEpicTaskList()) {
-                System.out.println(epicTasks);
-            }
-        }
-        if (repository.getSubtaskList() != null) {
-            for (SubTask epicTasks : repository.getSubtaskList()) {
-                System.out.println(epicTasks);
-            }
+        for (Task task : taskManager.listElement()) {
+            System.out.println(task);
         }
     }
 
@@ -34,14 +22,6 @@ public class Manager {
 
     public void addSubTask(EpicTask epicTask, SubTask tasks) {
         taskManager.addSubTask(epicTask, tasks);
-    }
-
-    public void addTask(Task tasks) {
-        taskManager.addTask(tasks);
-    }
-
-    public void changeTaskStatus(int id, Status status) {
-        taskManager.changeTaskStatus(id, status);
     }
 
     public void changeEpicStatus(int id, Status status) {
@@ -56,17 +36,18 @@ public class Manager {
         taskManager.changeSubtaskStatus(id, status);
     }
 
-    public void removeTask(int id) {
-        taskManager.removeTaskID(id);
+    public void removeById(int id) {
+        if (repository.getTaskList().contains(taskManager.getTaskById(id))) {
+            taskManager.removeByID(repository.getTaskList(), id);
+        } else if (repository.getSubtaskList().contains((SubTask) taskManager.getTaskById(id))) {
+            taskManager.removeByID(repository.getSubtaskList(), id);
+        } else if (repository.getEpicTaskList().contains((EpicTask) taskManager.getTaskById(id))) {
+            taskManager.removeByID(repository.getEpicTaskList(), id);
+        } else {
+            System.out.println("Указанного id нету");
+        }
     }
 
-    public void removeEpic(int id) {
-        taskManager.removeEpicID(id);
-    }
-
-    public void removeSubTask(int id) {
-        taskManager.removeSubTaskID(id);
-    }
 }
 
 

@@ -39,11 +39,11 @@ public class Main {
         manager.printAllElement();
         System.out.println("-----------------------------------------------");
 
-        manager.removeSubTask(5);
+        manager.removeById(5);
         manager.printAllElement();
         System.out.println("-----------------------------------------------");
 
-        manager.removeEpic(4);
+        manager.removeById(4);
         manager.printAllElement();
         System.out.println("-----------------------------------------------");
     }

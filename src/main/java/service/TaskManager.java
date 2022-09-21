@@ -6,42 +6,42 @@ import model.SubTask;
 import model.Task;
 import repository.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class TaskManager {
 
     private final Repository repository = new Repository();
 
-    private Task getTaskById(int id) {
-        Optional<Task> defaultTask = repository.getDefaultTaskList().stream()
+    public Task getTaskById(int id) {
+        Optional<Task> defaultTask = repository.getTaskList().stream()
                 .filter(t -> t.getId() == id).findFirst();
-        return defaultTask.orElse(null);
-    }
-
-    private SubTask getSubTaskById(int id) {
-        Optional<SubTask> subtask = repository.getSubtaskList().stream()
-                .filter(t -> t.getId() == id).findFirst();
-        return subtask.orElse(null);
-    }
-
-    private EpicTask getEpicTaskById(int id) {
         Optional<EpicTask> epicTask = repository.getEpicTaskList().stream()
                 .filter(t -> t.getId() == id).findFirst();
-        return epicTask.orElse(null);
+        Optional<SubTask> subtask = repository.getSubtaskList().stream()
+                .filter(t -> t.getId() == id).findFirst();
+        if (defaultTask.isPresent()) {
+            return defaultTask.get();
+        } else if (epicTask.isPresent()) {
+            return epicTask.get();
+        } else if (subtask.isPresent()) {
+            return subtask.get();
+        } else {
+            System.out.println("*** НЕТ");
+        }
+        return null;
     }
 
-    public List<Task> getTaskTypes() {
-        return repository.getDefaultTaskList();
-    }
-
-    public List<EpicTask> getEpicTaskTypes() {
-        return repository.getEpicTaskList();
-    }
-
-    public List<SubTask> getSubTaskTypes() {
-        return repository.getSubtaskList();
+    public List<Task> listElement() {
+        return new ArrayList<>() {{
+            addAll(repository.getTaskList());
+            addAll(repository.getEpicTaskList());
+            addAll(repository.getSubtaskList());
+        }};
     }
 
     public void updateTask(Task task, Task newTask) {
@@ -64,37 +64,41 @@ public class TaskManager {
     }
 
     public void changeSubtaskStatus(Integer id, Status status) {
-        SubTask subTask = (SubTask) getSubTaskById(id);
+        SubTask subTask = (SubTask) getTaskById(id);
+        assert subTask != null;
         subTask.setStatus(status);
         int epicId = subTask.getEpicId();
-        searchStatusDoneInChild(getEpicTaskById(epicId));
+        searchStatusDoneInChild((EpicTask) getTaskById(epicId));
     }
 
 
     public void changeEpicStatus(Integer id, Status status) {
-        EpicTask epicTask = getEpicTaskById(id);
-        if (status.equals(Status.IN_PROGRESS) && epicTask.getStatus().equals(Status.NEW)) {
-            epicTask.setStatus(status);
-            if (epicTask.getSubtaskIds() != null) {
-                for (Integer idSubtask : epicTask.getSubtaskIds()) {
-                    SubTask subtask = (SubTask) getSubTaskById(idSubtask);
-                    subtask.setStatus(Status.IN_PROGRESS);
+        EpicTask epicTask = (EpicTask) getTaskById(id);
+        if (epicTask != null) {
+            if (status.equals(Status.IN_PROGRESS) && Objects.requireNonNull(epicTask).getStatus().equals(Status.NEW)) {
+                epicTask.setStatus(status);
+                if (epicTask.getSubtaskIds() != null) {
+                    for (Integer idSubtask : epicTask.getSubtaskIds()) {
+                        SubTask subtask = (SubTask) getTaskById(idSubtask);
+                        assert subtask != null;
+                        subtask.setStatus(Status.IN_PROGRESS);
+                    }
                 }
-            }
-        } else if (status.equals(Status.NEW)) {
-            epicTask.setStatus(status);
-            if (epicTask.getSubtaskIds() != null) {
-                for (Integer idSubtask : epicTask.getSubtaskIds()) {
-                    SubTask subtask = (SubTask) getTaskById(idSubtask);
-                    subtask.setStatus(Status.NEW);
+            } else if (status.equals(Status.NEW)) {
+                epicTask.setStatus(status);
+                if (epicTask.getSubtaskIds() != null) {
+                    for (Integer idSubtask : epicTask.getSubtaskIds()) {
+                        SubTask subtask = (SubTask) getTaskById(idSubtask);
+                        assert subtask != null;
+                        subtask.setStatus(Status.NEW);
+                    }
                 }
             }
         }
     }
 
     public void changeTaskStatus(Integer id, Status status) {
-        Task task = getTaskById(id);
-        task.setStatus(status);
+        Objects.requireNonNull(getTaskById(id)).setStatus(status);
     }
 
     public void searchStatusDoneInChild(EpicTask task) {
@@ -108,23 +112,16 @@ public class TaskManager {
         }
     }
 
-    public void removeTaskID(Integer id) {
-        Task taskFromId = getTaskById(id);
-        repository.getDefaultTaskList().remove(taskFromId);
+    public void removeByID(List listRepository, Integer id) {
+        listRepository.remove(getTaskById(id));
     }
 
-    public void removeSubTaskID(Integer id) {
-        SubTask taskFromId = getSubTaskById(id);
-        repository.getSubtaskList().remove(taskFromId);
-    }
-
-    public void removeEpicID(Integer id) {
-        EpicTask taskFromId = getEpicTaskById(id);
-        repository.getEpicTaskList().remove(taskFromId);
+    public void cleanRepository(List listRepository) {
+        listRepository.clear();
     }
 
     public void addTask(Task task) {
-        repository.addDefaultTaskList(task);
+        repository.addTaskList(task);
     }
 
     public void addEpicTask(EpicTask epicTask) {
@@ -134,6 +131,13 @@ public class TaskManager {
     public void addSubTask(EpicTask epicTask, SubTask subtask) {
         epicTask.addSubtask(subtask);
         repository.addSubtaskList(subtask);
+    }
+
+    public List<SubTask> getSubListOfEpic(EpicTask task) {
+        return repository.getSubtaskList()
+                .stream()
+                .filter(t -> task.getSubtaskIds().contains(t.getId()))
+                .collect(Collectors.toList());
     }
 }
 
