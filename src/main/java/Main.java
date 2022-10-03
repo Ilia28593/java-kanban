@@ -1,6 +1,7 @@
 import model.EpicTask;
 import model.Status;
 import model.SubTask;
+import service.Managers;
 
 import static model.Status.DONE;
 import static model.Status.IN_PROGRESS;
@@ -25,18 +26,19 @@ public class Main {
         manager.addEpicTask(birthday);
         manager.addSubTask(birthday, birthday1);
         manager.printAllElement();
+        manager.printHistoryElement();
         System.out.println("-----------------------------------------------");
 
         manager.changeEpicStatus(1, IN_PROGRESS);
-        manager.printAllElement();
+        manager.printHistoryElement();
         System.out.println("-----------------------------------------------");
 
         manager.changeSubTaskStatus(2, DONE);
-        manager.printAllElement();
+        manager.printHistoryElement();
         System.out.println("-----------------------------------------------");
 
         manager.changeSubTaskStatus(3, DONE);
-        manager.printAllElement();
+        manager.printHistoryElement();
         System.out.println("-----------------------------------------------");
 
         manager.removeById(5);
