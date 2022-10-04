@@ -1,6 +1,7 @@
 import model.EpicTask;
 import model.Status;
 import model.SubTask;
+import repository.Repository;
 import service.Managers;
 
 import static model.Status.DONE;
@@ -15,6 +16,7 @@ public class Main {
         SubTask draiving1 = new SubTask("Собрать коробки", "Разложить вещи по коробкам", Status.NEW);
         SubTask draiving2 = new SubTask("Найти компанию по перевозки грузов"
                 , "Заказать машину на определенный день", Status.NEW);
+
 
         EpicTask birthday = new EpicTask("Празднование ДР", "Организовать вкусную еду", Status.NEW);
         SubTask birthday1 = new SubTask("Посчитать количество гостей", "Сделать рассадку", Status.NEW);
@@ -46,6 +48,11 @@ public class Main {
         System.out.println("-----------------------------------------------");
 
         manager.removeById(4);
+        manager.printAllElement();
+        System.out.println("-----------------------------------------------");
+
+        SubTask draiving3 = new SubTask("Собрать коробкиdfd", "Разложить вещи по коробкамdfd", Status.NEW);
+        manager.addSubTask(draiving, draiving3);
         manager.printAllElement();
         System.out.println("-----------------------------------------------");
     }

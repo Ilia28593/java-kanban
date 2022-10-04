@@ -11,6 +11,10 @@ public interface TaskManager {
 
     Task getTaskById(int id);
 
+    Task getEpicTaskById(int id);
+
+    Task getSubTaskById(int id);
+
     List<Task> listElement();
 
     void updateTask(Task task, Task newTask);
@@ -27,9 +31,9 @@ public interface TaskManager {
 
     void searchStatusDoneInChild(EpicTask task);
 
-    void removeByID(List listRepository, Integer id);
+    void removeByID( Integer id);
 
-    void cleanRepository(List listRepository);
+    void cleanRepository();
 
     void addTask(Task task);
 

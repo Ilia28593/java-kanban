@@ -3,12 +3,12 @@ package model;
 import lombok.Data;
 
 @Data
-public abstract class id {
+public abstract class Id {
 
     private static int ids;
     protected int id;
 
-    public id() {
+    public Id() {
         ids++;
         this.id = ids;
     }

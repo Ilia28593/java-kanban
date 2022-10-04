@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class InMemoryTaskManager implements TaskManager{
+public class InMemoryTaskManager implements TaskManager {
 
     public Repository repository = new Repository();
 
@@ -21,20 +21,21 @@ public class InMemoryTaskManager implements TaskManager{
     public Task getTaskById(int id) {
         Optional<Task> defaultTask = repository.getTaskList().stream()
                 .filter(t -> t.getId() == id).findFirst();
+        return defaultTask.orElse(null);
+    }
+
+    @Override
+    public Task getEpicTaskById(int id) {
         Optional<EpicTask> epicTask = repository.getEpicTaskList().stream()
                 .filter(t -> t.getId() == id).findFirst();
+        return epicTask.orElse(null);
+    }
+
+    @Override
+    public Task getSubTaskById(int id) {
         Optional<SubTask> subtask = repository.getSubtaskList().stream()
                 .filter(t -> t.getId() == id).findFirst();
-        if (defaultTask.isPresent()) {
-            return defaultTask.get();
-        } else if (epicTask.isPresent()) {
-            return epicTask.get();
-        } else if (subtask.isPresent()) {
-            return subtask.get();
-        } else {
-            System.out.println("НЕТ");
-        }
-        return null;
+        return subtask.orElse(null);
     }
 
     @Override
@@ -70,22 +71,23 @@ public class InMemoryTaskManager implements TaskManager{
 
     @Override
     public void changeSubtaskStatus(Integer id, Status status) {
-        SubTask subTask = (SubTask) getTaskById(id);
-        assert subTask != null;
-        subTask.setStatus(status);
-        int epicId = subTask.getEpicId();
-        searchStatusDoneInChild((EpicTask) getTaskById(epicId));
+        SubTask subTask = (SubTask) getSubTaskById(id);
+        if (subTask != null) {
+            subTask.setStatus(status);
+            int epicId = subTask.getEpicId();
+            searchStatusDoneInChild((EpicTask) getEpicTaskById(epicId));
+        }
     }
 
     @Override
     public void changeEpicStatus(Integer id, Status status) {
-        EpicTask epicTask = (EpicTask) getTaskById(id);
+        EpicTask epicTask = (EpicTask) getEpicTaskById(id);
         if (epicTask != null) {
             if (status.equals(Status.IN_PROGRESS) && Objects.requireNonNull(epicTask).getStatus().equals(Status.NEW)) {
                 epicTask.setStatus(status);
                 if (epicTask.getSubtaskIds() != null) {
                     for (Integer idSubtask : epicTask.getSubtaskIds()) {
-                        SubTask subtask = (SubTask) getTaskById(idSubtask);
+                        SubTask subtask = (SubTask) getSubTaskById(idSubtask);
                         assert subtask != null;
                         subtask.setStatus(Status.IN_PROGRESS);
                     }
@@ -94,7 +96,7 @@ public class InMemoryTaskManager implements TaskManager{
                 epicTask.setStatus(status);
                 if (epicTask.getSubtaskIds() != null) {
                     for (Integer idSubtask : epicTask.getSubtaskIds()) {
-                        SubTask subtask = (SubTask) getTaskById(idSubtask);
+                        SubTask subtask = (SubTask) getSubTaskById(idSubtask);
                         assert subtask != null;
                         subtask.setStatus(Status.NEW);
                     }
@@ -121,13 +123,21 @@ public class InMemoryTaskManager implements TaskManager{
     }
 
     @Override
-    public void removeByID(List listRepository, Integer id) {
-        listRepository.remove(getTaskById(id));
+    public void removeByID(Integer id) {
+        if (!repository.getTaskList().isEmpty() && repository.getTaskList().stream().anyMatch(t -> t.getId() == id)) {
+           repository.getTaskList().remove(getTaskById(id));
+        } else if (!repository.getSubtaskList().isEmpty() && repository.getSubtaskList().stream().anyMatch(t -> t.getId() == id)) {
+            repository.getSubtaskList().remove((SubTask) getSubTaskById(id));
+        } else if (!repository.getEpicTaskList().isEmpty() && repository.getEpicTaskList().stream().anyMatch(t -> t.getId() == id)) {
+            repository.getEpicTaskList().remove((EpicTask) getEpicTaskById(id));
+        }
     }
 
     @Override
-    public void cleanRepository(List listRepository) {
-        listRepository.clear();
+    public void cleanRepository() {
+        repository.getEpicTaskList().clear();
+        repository.getSubtaskList().clear();
+        repository.getTaskList().clear();
     }
 
     @Override
@@ -142,15 +152,24 @@ public class InMemoryTaskManager implements TaskManager{
 
     @Override
     public void addSubTask(EpicTask epicTask, SubTask subtask) {
+        if(epicTask.getStatus() == Status.DONE){
+            epicTask.setStatus(Status.IN_PROGRESS);
+            subtask.setStatus(Status.IN_PROGRESS);
+        } else if(epicTask.getStatus() == Status.IN_PROGRESS){
+            subtask.setStatus(Status.IN_PROGRESS);
+        }
         epicTask.addSubtask(subtask);
         repository.addSubtaskList(subtask);
     }
 
     @Override
     public List<SubTask> getSubListOfEpic(EpicTask task) {
-        return repository.getSubtaskList()
-                .stream()
-                .filter(t -> task.getSubtaskIds().contains(t.getId()))
-                .collect(Collectors.toList());
+        if(task!=null) {
+            return repository.getSubtaskList()
+                    .stream()
+                    .filter(t -> task.getSubtaskIds().contains(t.getId()))
+                    .collect(Collectors.toList());
+        }
+        return null;
     }
 }

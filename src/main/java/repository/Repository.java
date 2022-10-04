@@ -16,16 +16,16 @@ public class Repository {
         return subTaskList;
     }
 
-    public void addSubtaskList(SubTask subTaskList) {
-        Repository.subTaskList.add(subTaskList);
+    public void addSubtaskList(SubTask subTask) {
+        subTaskList.add(subTask);
     }
 
-    public void addTaskList(Task taskList) {
-        Repository.taskList.add(taskList);
+    public void addTaskList(Task task) {
+        taskList.add(task);
     }
 
-    public void addEpicTaskList(EpicTask epicTaskList) {
-        Repository.epicTaskList.add(epicTaskList);
+    public void addEpicTaskList(EpicTask epicTask) {
+       epicTaskList.add(epicTask);
     }
 
     public List<Task> getTaskList() {

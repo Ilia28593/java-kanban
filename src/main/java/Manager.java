@@ -28,6 +28,7 @@ public class Manager {
         managers.getHistory().add(tasks);
     }
 
+
     public void addSubTask(EpicTask epicTask, SubTask tasks) {
         managers.getDefault().addSubTask(epicTask, tasks);
         managers.getHistory().add(tasks);
@@ -36,25 +37,19 @@ public class Manager {
     public void changeEpicStatus(int id, Status status) {
         if (status.equals(Status.IN_PROGRESS) || status.equals(Status.NEW)) {
             managers.getDefault().changeEpicStatus(id, status);
-            managers.getHistory().add(managers.getDefault().getTaskById(id));
+            managers.getHistory().add(managers.getDefault().getEpicTaskById(id));
         } else {
             System.out.println("Статус поменяется на Done автоматически, после выполнения всех SubTask ");
         }
     }
 
     public void changeSubTaskStatus(int id, Status status) {
-        managers.getHistory().add(managers.getDefault().getTaskById(id));
+        managers.getHistory().add(managers.getDefault().getSubTaskById(id));
         managers.getDefault().changeSubtaskStatus(id, status);
     }
 
     public void removeById(int id) {
-        if (!repository.getTaskList().isEmpty() && repository.getTaskList().stream().anyMatch(t -> t.getId() == id)) {
-            managers.getDefault().removeByID(repository.getTaskList(), id);
-        } else if (!repository.getSubtaskList().isEmpty() && repository.getSubtaskList().stream().anyMatch(t -> t.getId() == id)) {
-            managers.getDefault().removeByID(repository.getSubtaskList(), id);
-        } else if (!repository.getEpicTaskList().isEmpty() && repository.getEpicTaskList().stream().anyMatch(t -> t.getId() == id)) {
-            managers.getDefault().removeByID(repository.getEpicTaskList(), id);
-        }
+        managers.getDefault().removeByID(id);
     }
 
 }

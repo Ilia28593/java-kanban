@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-public class Task extends id {
+public class Task extends Id {
     protected String nameTask;
     protected String taskDetail;
     protected Status status;
