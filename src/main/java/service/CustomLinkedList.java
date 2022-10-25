@@ -5,11 +5,13 @@ import model.Task;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class CustomLinkedList {
     public final static Map<Integer, Node<Task>> nodeMap = new HashMap<>();
     private static Node<Task> first;
     private static Node<Task> last;
+    private int historySize;
 
     public ArrayList<Task> getTasks() {
         ArrayList<Task> tasks = new ArrayList<>();
@@ -24,6 +26,7 @@ public class CustomLinkedList {
 
     public void linkLast(Task task) {
         final Node<Task> node = new Node<>(task, last, null);
+        checkSize();
         if (first == null) {
             first = node;
         } else {
@@ -31,6 +34,13 @@ public class CustomLinkedList {
         }
         last = node;
         nodeMap.put(task.getId(), node);
+        historySize++;
+    }
+
+    private void checkSize() {
+        if (historySize <= 10) {
+            remove(first.task.getId());
+        }
     }
 
     public void remove(int id) {
@@ -75,5 +85,18 @@ class Node<Task> {
         this.task = task;
         this.next = next;
         this.before = before;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Node<?> node = (Node<?>) o;
+        return Objects.equals(task, node.task) && Objects.equals(next, node.next) && Objects.equals(before, node.before);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(task, next, before);
     }
 }
