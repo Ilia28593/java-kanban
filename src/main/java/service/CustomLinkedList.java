@@ -36,23 +36,33 @@ public class CustomLinkedList {
     public void remove(int id) {
         if (nodeMap.containsKey(id)) {
             Task task = nodeMap.get(id).task;
-            if (first == null) {
-                return;
-            }
-            if (first.task == task) {
-                first = first.next;
-                return;
-            }
+            if (checkInFirstAndSetNext(task)) return;
             Node<Task> currentNode = first;
-            while (currentNode.next != null) {
-                if (currentNode.next.task == task) {
-                    currentNode.next = currentNode.next.next;
-                    return;
-                }
-                currentNode = currentNode.next;
-            }
+            if (updateNextInNew(task, currentNode)) return;
             nodeMap.remove(id);
         }
+    }
+
+    private boolean checkInFirstAndSetNext(Task task) {
+        if (first == null) {
+            return true;
+        }
+        if (first.task == task) {
+            first = first.next;
+            return true;
+        }
+        return false;
+    }
+
+    private boolean updateNextInNew(Task task, Node<Task> currentNode) {
+        while (currentNode.next != null) {
+            if (currentNode.next.task == task) {
+                currentNode.next = currentNode.next.next;
+                return true;
+            }
+            currentNode = currentNode.next;
+        }
+        return false;
     }
 }
 
