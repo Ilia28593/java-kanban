@@ -28,7 +28,6 @@ public class Main {
         manager.addEpicTask(birthday);
         manager.addSubTask(birthday, birthday1);
         manager.printAllElement();
-        manager.printHistoryElement();
         System.out.println("-----------------------------------------------");
 
 //        manager.changeEpicStatus(1, IN_PROGRESS);
@@ -39,17 +38,18 @@ public class Main {
 //        manager.printHistoryElement();
 //        System.out.println("-----------------------------------------------");
 //
-//        manager.changeSubTaskStatus(3, DONE);
-//        manager.printHistoryElement();
-//        System.out.println("-----------------------------------------------");
+        manager.changeSubTaskStatus(3, DONE);
+        manager.printHistoryElement();
+        System.out.println("-----------------------------------------------");
 //
 //        manager.removeById(5);
 //        manager.printAllElement();
 //        System.out.println("-----------------------------------------------");
 //
-//        manager.removeById(4);
-//        manager.printAllElement();
-//        System.out.println("-----------------------------------------------");
+        manager.removeById(4);
+        manager.printAllElement();
+        System.out.println("-----------------------------------------------");
+        manager.printHistoryElement();
 //
 //        SubTask draiving3 = new SubTask("Собрать коробкиdfd", "Разложить вещи по коробкамdfd", Status.NEW);
 //        manager.addSubTask(draiving, draiving3);

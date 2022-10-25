@@ -84,24 +84,23 @@ public class InMemoryTaskManager implements TaskManager {
         EpicTask epicTask = (EpicTask) getEpicTaskById(id);
         if (epicTask != null) {
             if (status.equals(Status.IN_PROGRESS) && Objects.requireNonNull(epicTask).getStatus().equals(Status.NEW)) {
-                extracted(Status.IN_PROGRESS, epicTask);
+                CheckStatusInSubTask(Status.IN_PROGRESS, epicTask);
             } else if (status.equals(Status.NEW)) {
-                extracted(Status.NEW, epicTask);
+                CheckStatusInSubTask(Status.NEW, epicTask);
             }
         }
     }
 
-    private void extracted(Status status, EpicTask epicTask) {
+    private void CheckStatusInSubTask(Status status, EpicTask epicTask) {
         epicTask.setStatus(status);
         if (epicTask.getSubtaskIds() != null) {
-            extracted(epicTask, status);
+            SetNewStatusInSubTask(epicTask, status);
         }
     }
 
-    private void extracted(EpicTask epicTask, Status status) {
+    private void SetNewStatusInSubTask(EpicTask epicTask, Status status) {
         for (Integer idSubtask : epicTask.getSubtaskIds()) {
             SubTask subtask = (SubTask) getSubTaskById(idSubtask);
-            assert subtask != null;
             subtask.setStatus(status);
         }
     }
@@ -125,11 +124,13 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeByID(Integer id) {
-        if (!repository.getTaskList().isEmpty() && repository.getTaskList().stream().anyMatch(t -> t.getId() == id)) {
+        if (!repository.getTaskList().isEmpty() && getTaskById(id) != null) {
            repository.getTaskList().remove(getTaskById(id));
-        } else if (!repository.getSubtaskList().isEmpty() && repository.getSubtaskList().stream().anyMatch(t -> t.getId() == id)) {
+        } else if (!repository.getSubtaskList().isEmpty() && getSubTaskById(id) !=null) {
             repository.getSubtaskList().remove((SubTask) getSubTaskById(id));
-        } else if (!repository.getEpicTaskList().isEmpty() && repository.getEpicTaskList().stream().anyMatch(t -> t.getId() == id)) {
+        } else if (!repository.getEpicTaskList().isEmpty() && getEpicTaskById(id) != null) {
+            EpicTask epicTask = (EpicTask) getEpicTaskById(id);
+            epicTask.getSubtaskIds().forEach(this::removeByID);
             repository.getEpicTaskList().remove((EpicTask) getEpicTaskById(id));
         }
     }
