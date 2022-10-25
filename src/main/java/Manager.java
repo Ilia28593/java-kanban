@@ -3,6 +3,7 @@ import model.Status;
 import model.SubTask;
 import model.Task;
 import repository.Repository;
+import service.Node;
 import service.Managers;
 
 
@@ -18,9 +19,7 @@ public class Manager {
     }
 
     public void printHistoryElement() {
-        for (Task task : managers.getHistory().getHistory()) {
-            System.out.println(task);
-        }
+        managers.getHistory().getHistoryList().forEach(System.out::println);
     }
 
     public void addEpicTask(EpicTask tasks) {

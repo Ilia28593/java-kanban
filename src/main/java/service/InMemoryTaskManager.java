@@ -84,24 +84,25 @@ public class InMemoryTaskManager implements TaskManager {
         EpicTask epicTask = (EpicTask) getEpicTaskById(id);
         if (epicTask != null) {
             if (status.equals(Status.IN_PROGRESS) && Objects.requireNonNull(epicTask).getStatus().equals(Status.NEW)) {
-                epicTask.setStatus(status);
-                if (epicTask.getSubtaskIds() != null) {
-                    for (Integer idSubtask : epicTask.getSubtaskIds()) {
-                        SubTask subtask = (SubTask) getSubTaskById(idSubtask);
-                        assert subtask != null;
-                        subtask.setStatus(Status.IN_PROGRESS);
-                    }
-                }
+                extracted(Status.IN_PROGRESS, epicTask);
             } else if (status.equals(Status.NEW)) {
-                epicTask.setStatus(status);
-                if (epicTask.getSubtaskIds() != null) {
-                    for (Integer idSubtask : epicTask.getSubtaskIds()) {
-                        SubTask subtask = (SubTask) getSubTaskById(idSubtask);
-                        assert subtask != null;
-                        subtask.setStatus(Status.NEW);
-                    }
-                }
+                extracted(Status.NEW, epicTask);
             }
+        }
+    }
+
+    private void extracted(Status status, EpicTask epicTask) {
+        epicTask.setStatus(status);
+        if (epicTask.getSubtaskIds() != null) {
+            extracted(epicTask, status);
+        }
+    }
+
+    private void extracted(EpicTask epicTask, Status status) {
+        for (Integer idSubtask : epicTask.getSubtaskIds()) {
+            SubTask subtask = (SubTask) getSubTaskById(idSubtask);
+            assert subtask != null;
+            subtask.setStatus(status);
         }
     }
 
