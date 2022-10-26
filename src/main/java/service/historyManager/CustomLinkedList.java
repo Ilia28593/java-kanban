@@ -40,18 +40,17 @@ public class CustomLinkedList {
     private void checkSize() {
         if (historySize >= 10) {
             remove(first.task.getId());
-            historySize--;
         }
     }
 
     public void remove(int id) {
         if (nodeMap.containsKey(id)) {
+            historySize--;
             Task task = nodeMap.get(id).task;
             if (checkInFirstAndSetNext(task)) return;
             Node<Task> currentNode = first;
             if (updateNextInNew(task, currentNode)) return;
             nodeMap.remove(id);
-            historySize--;
         }
     }
 
