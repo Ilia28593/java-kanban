@@ -1,4 +1,4 @@
-package service;
+package service.history;
 
 import model.Task;
 
@@ -8,9 +8,9 @@ import java.util.Map;
 import java.util.Objects;
 
 public class CustomLinkedList {
-    public final static Map<Integer, Node<Task>> nodeMap = new HashMap<>();
-    private static Node<Task> first;
-    private static Node<Task> last;
+    public final Map<Integer, Node<Task>> nodeMap = new HashMap<>();
+    private Node<Task> first;
+    private Node<Task> last;
     private int historySize;
 
     public ArrayList<Task> getTasks() {

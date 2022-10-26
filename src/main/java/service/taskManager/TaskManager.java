@@ -1,4 +1,4 @@
-package service;
+package service.taskManager;
 
 import model.EpicTask;
 import model.Status;
@@ -8,6 +8,7 @@ import model.Task;
 import java.util.List;
 
 public interface TaskManager {
+    void printHistoryElement();
 
     void printAllElement();
 

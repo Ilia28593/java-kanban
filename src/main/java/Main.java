@@ -1,14 +1,18 @@
 import model.EpicTask;
 import model.Status;
 import model.SubTask;
-import service.InMemoryTaskManager;
+import service.Managers;
+import service.taskManager.TaskManager;
 
 import static model.Status.DONE;
+import static model.Status.IN_PROGRESS;
 
 public class Main {
-    private static final InMemoryTaskManager manager = new InMemoryTaskManager();
 
     public static void main(String[] args) {
+
+        final TaskManager manager = Managers.getDefault();
+
 
         EpicTask draiving = new EpicTask("Переезд", "Продумать план переезда", Status.NEW);
         SubTask draiving1 = new SubTask("Собрать коробки", "Разложить вещи по коробкам", Status.NEW);
@@ -29,14 +33,14 @@ public class Main {
         System.out.println("-----------------------------------------------");
         manager.printHistoryElement();
         System.out.println("-----------------------------------------------");
-//        manager.changeEpicStatus(1, IN_PROGRESS);
-//        manager.printHistoryElement();
-//        System.out.println("-----------------------------------------------");
-//
-//        manager.changeSubTaskStatus(2, DONE);
-//        manager.printHistoryElement();
-//        System.out.println("-----------------------------------------------");
-//
+        manager.changeEpicStatus(1, IN_PROGRESS);
+        manager.printHistoryElement();
+        System.out.println("-----------------------------------------------");
+
+        manager.changeSubtaskStatus(2, DONE);
+        manager.printHistoryElement();
+        System.out.println("-----------------------------------------------");
+
         manager.changeSubtaskStatus(3, DONE);
         manager.printHistoryElement();
         System.out.println("-----------------------------------------------");
@@ -46,7 +50,7 @@ public class Main {
         System.out.println("-----------------------------------------------");
         manager.printHistoryElement();
         System.out.println("-----------------------------------------------");
-//
+
         manager.removeByID(4);
         manager.printAllElement();
         System.out.println("-----------------------------------------------");

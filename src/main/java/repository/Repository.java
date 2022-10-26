@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Repository {
-    private static final List<Task> taskList = new ArrayList<>();
-    private static final List<EpicTask> epicTaskList = new ArrayList<>();
-    private static final List<SubTask> subTaskList = new ArrayList<>();
+    private final List<Task> taskList = new ArrayList<>();
+    private final List<EpicTask> epicTaskList = new ArrayList<>();
+    private final List<SubTask> subTaskList = new ArrayList<>();
 
     public List<SubTask> getSubtaskList() {
         return subTaskList;
