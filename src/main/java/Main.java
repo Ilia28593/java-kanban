@@ -41,7 +41,7 @@ public class Main {
         manager.printHistoryElement();
         System.out.println("-----------------------------------------------");
 
-        manager.updateEpicTask(draiving,birthday);
+        manager.updateEpicTask(draiving, birthday);
         manager.printAllElement();
         System.out.println("-----------------------------------------------");
         manager.printHistoryElement();

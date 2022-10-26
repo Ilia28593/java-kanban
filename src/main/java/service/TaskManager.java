@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface TaskManager {
 
-     void printAllElement();
+    void printAllElement();
 
     Task getTaskById(int id);
 
@@ -33,7 +33,7 @@ public interface TaskManager {
 
     void searchStatusDoneInChild(EpicTask task);
 
-    void removeByID( Integer id);
+    void removeByID(Integer id);
 
     void cleanRepository();
 
