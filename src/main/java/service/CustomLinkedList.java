@@ -38,7 +38,7 @@ public class CustomLinkedList {
     }
 
     private void checkSize() {
-        if (historySize <= 10) {
+        if (historySize >= 10) {
             remove(first.task.getId());
         }
     }

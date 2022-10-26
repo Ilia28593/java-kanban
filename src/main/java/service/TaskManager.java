@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface TaskManager {
 
+     void printAllElement();
+
     Task getTaskById(int id);
 
     Task getEpicTaskById(int id);
@@ -17,13 +19,13 @@ public interface TaskManager {
 
     List<Task> listElement();
 
-    void updateTask(Task task, Task newTask);
+    Task updateTask(Task task, Task newTask);
 
-    void updateEpicTask(EpicTask task, EpicTask newTask);
+    Task updateEpicTask(EpicTask task, EpicTask newTask);
 
-    void updateSubtaskTask(SubTask task, SubTask newSubTask);
+    Task updateSubtaskTask(SubTask task, SubTask newSubTask);
 
-    void changeSubtaskStatus(Integer id, Status status);
+    void changeSubtaskStatus(int id, Status status);
 
     void changeEpicStatus(Integer id, Status status);
 

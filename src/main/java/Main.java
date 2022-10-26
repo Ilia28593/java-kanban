@@ -1,14 +1,12 @@
 import model.EpicTask;
 import model.Status;
 import model.SubTask;
-import repository.Repository;
-import service.Managers;
+import service.InMemoryTaskManager;
 
 import static model.Status.DONE;
-import static model.Status.IN_PROGRESS;
 
 public class Main {
-    private static final Manager manager = new Manager();
+    private static final InMemoryTaskManager manager = new InMemoryTaskManager();
 
     public static void main(String[] args) {
 
@@ -29,7 +27,8 @@ public class Main {
         manager.addSubTask(birthday, birthday1);
         manager.printAllElement();
         System.out.println("-----------------------------------------------");
-
+        manager.printHistoryElement();
+        System.out.println("-----------------------------------------------");
 //        manager.changeEpicStatus(1, IN_PROGRESS);
 //        manager.printHistoryElement();
 //        System.out.println("-----------------------------------------------");
@@ -38,22 +37,19 @@ public class Main {
 //        manager.printHistoryElement();
 //        System.out.println("-----------------------------------------------");
 //
-        manager.changeSubTaskStatus(3, DONE);
+        manager.changeSubtaskStatus(3, DONE);
         manager.printHistoryElement();
         System.out.println("-----------------------------------------------");
-//
-//        manager.removeById(5);
-//        manager.printAllElement();
-//        System.out.println("-----------------------------------------------");
-//
-        manager.removeById(4);
+
+        manager.updateEpicTask(draiving,birthday);
         manager.printAllElement();
         System.out.println("-----------------------------------------------");
         manager.printHistoryElement();
+        System.out.println("-----------------------------------------------");
 //
-//        SubTask draiving3 = new SubTask("Собрать коробкиdfd", "Разложить вещи по коробкамdfd", Status.NEW);
-//        manager.addSubTask(draiving, draiving3);
-//        manager.printAllElement();
-//        System.out.println("-----------------------------------------------");
+        manager.removeByID(4);
+        manager.printAllElement();
+        System.out.println("-----------------------------------------------");
+        manager.printHistoryElement();
     }
 }

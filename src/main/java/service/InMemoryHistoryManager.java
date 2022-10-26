@@ -2,11 +2,11 @@ package service;
 
 import model.Task;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    CustomLinkedList customLinkedList = new CustomLinkedList();
+    private final CustomLinkedList customLinkedList = new CustomLinkedList();
 
     @Override
     public void remove(int id) {
@@ -20,7 +20,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     @Override
-    public ArrayList<Task> getHistoryList() {
+    public List<Task> getHistoryList() {
         return customLinkedList.getTasks();
     }
 }
