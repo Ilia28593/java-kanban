@@ -1,7 +1,7 @@
 package service;
 
-import service.history.HistoryManager;
-import service.history.InMemoryHistoryManager;
+import service.historyManager.HistoryManager;
+import service.historyManager.InMemoryHistoryManager;
 import service.taskManager.InMemoryTaskManager;
 import service.taskManager.TaskManager;
 

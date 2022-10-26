@@ -1,4 +1,4 @@
-package service.history;
+package service.historyManager;
 
 import model.Task;
 
@@ -40,6 +40,7 @@ public class CustomLinkedList {
     private void checkSize() {
         if (historySize >= 10) {
             remove(first.task.getId());
+            historySize--;
         }
     }
 
@@ -50,6 +51,7 @@ public class CustomLinkedList {
             Node<Task> currentNode = first;
             if (updateNextInNew(task, currentNode)) return;
             nodeMap.remove(id);
+            historySize--;
         }
     }
 

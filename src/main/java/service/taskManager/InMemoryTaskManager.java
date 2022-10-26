@@ -5,7 +5,7 @@ import model.Status;
 import model.SubTask;
 import model.Task;
 import repository.Repository;
-import service.history.InMemoryHistoryManager;
+import service.historyManager.InMemoryHistoryManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,12 +96,12 @@ public class InMemoryTaskManager implements TaskManager {
             } else if (status.equals(Status.NEW)) {
                 CheckStatusInSubTask(Status.NEW, epicTask);
             }
-            managerHistory.add(epicTask);
         }
     }
 
     private void CheckStatusInSubTask(Status status, EpicTask epicTask) {
         epicTask.setStatus(status);
+        managerHistory.add(epicTask);
         if (epicTask.getSubtaskIds() != null) {
             SetNewStatusInSubTask(epicTask, status);
         }
