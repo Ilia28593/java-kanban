@@ -77,12 +77,12 @@ public class CustomLinkedList {
     }
 }
 
-class Node<Task> {
-    final Task task;
-    Node<Task> next;
-    Node<Task> before;
+class Node<T> {
+    final T task;
+    Node<T> next;
+    Node<T> before;
 
-    public Node(Task task, Node<Task> before, Node<Task> next) {
+    public Node(T task, Node<T> before, Node<T> next) {
         this.task = task;
         this.next = next;
         this.before = before;
