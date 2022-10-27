@@ -13,6 +13,10 @@ public class SubTask extends Task {
     public SubTask(String nameTask, String taskDetail, Status status) {
         super(nameTask, taskDetail, status);
     }
+    public SubTask(String nameTask, String taskDetail, Status status, int id) {
+        super(nameTask, taskDetail, status,id);
+        this.id=id;
+    }
 
     @Override
     public String toString() {

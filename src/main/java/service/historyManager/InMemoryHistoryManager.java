@@ -15,7 +15,9 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void add(Task task) {
-        remove(task.getId());
+        if (customLinkedList.nodeMap.containsValue(task)) {
+            remove(task.getId());
+        }
         customLinkedList.linkLast(task);
     }
 
@@ -24,5 +26,6 @@ public class InMemoryHistoryManager implements HistoryManager {
         return customLinkedList.getTasks();
     }
 }
+
 
 

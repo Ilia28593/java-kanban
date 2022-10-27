@@ -33,8 +33,6 @@ public interface TaskManager {
 
     void changeTaskStatus(Integer id, Status status);
 
-    void searchStatusDoneInChild(EpicTask task);
-
     void removeByID(Integer id);
 
     void cleanRepository();

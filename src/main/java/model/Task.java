@@ -11,12 +11,27 @@ public class Task extends Id {
     protected String nameTask;
     protected String taskDetail;
     protected Status status;
+    protected Type type;
 
     public Task(String nameTask, String taskDetail, Status status) {
         super();
         this.nameTask = nameTask;
         this.taskDetail = taskDetail;
         this.status = status;
+    }
+
+    public Task(String nameTask, String taskDetail, Status status, int id) {
+        this.id=id;
+        this.nameTask = nameTask;
+        this.taskDetail = taskDetail;
+        this.status = status;
+    }
+
+    public Task(String nameTask, String taskDetail, Status status, Type type) {
+        this.nameTask = nameTask;
+        this.taskDetail = taskDetail;
+        this.status = status;
+        this.type = type;
     }
 
     @Override

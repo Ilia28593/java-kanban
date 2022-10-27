@@ -5,34 +5,48 @@ import model.SubTask;
 import model.Task;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Repository {
-    private final List<Task> taskList = new ArrayList<>();
-    private final List<EpicTask> epicTaskList = new ArrayList<>();
-    private final List<SubTask> subTaskList = new ArrayList<>();
+    private static final Map<Integer, Task> taskMap = new HashMap<>();
+    private static final Map<Integer, EpicTask> epicTaskMap = new HashMap<>();
+    private static final Map<Integer, SubTask> subTaskMap = new HashMap<>();
+
+    public Map<Integer, Task> getTaskMap() {
+        return taskMap;
+    }
+
+    public Map<Integer, EpicTask> getEpicTaskMap() {
+        return epicTaskMap;
+    }
+
+    public Map<Integer, SubTask> getSubTaskMap() {
+        return subTaskMap;
+    }
+
+    public void addSubtaskMap(SubTask subTask) {
+        subTaskMap.put(subTask.getId(), subTask);
+    }
+
+    public void addTaskMap(Task task) {
+        taskMap.put(task.getId(), task);
+    }
+
+    public void addEpicTaskMap(EpicTask epicTask) {
+        epicTaskMap.put(epicTask.getId(), epicTask);
+    }
 
     public List<SubTask> getSubtaskList() {
-        return subTaskList;
-    }
-
-    public void addSubtaskList(SubTask subTask) {
-        subTaskList.add(subTask);
-    }
-
-    public void addTaskList(Task task) {
-        taskList.add(task);
-    }
-
-    public void addEpicTaskList(EpicTask epicTask) {
-       epicTaskList.add(epicTask);
+        return new ArrayList<>(subTaskMap.values());
     }
 
     public List<Task> getTaskList() {
-        return taskList;
+        return new ArrayList<>(taskMap.values());
     }
 
     public List<EpicTask> getEpicTaskList() {
-        return epicTaskList;
+        return new ArrayList<>(epicTaskMap.values());
     }
 }
