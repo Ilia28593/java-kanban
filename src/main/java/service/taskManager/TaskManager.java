@@ -8,6 +8,7 @@ import model.Task;
 import java.util.List;
 
 public interface TaskManager {
+
     void printHistoryElement();
 
     void printAllElement();

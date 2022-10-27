@@ -9,9 +9,11 @@ import static model.Status.IN_PROGRESS;
 
 public class Main {
 
+    private final static Managers managers = new Managers();
+
     public static void main(String[] args) {
 
-        final TaskManager manager = Managers.getDefault();
+        final TaskManager manager = managers.getDefaultTaskManager();
 
 
         EpicTask draiving = new EpicTask("Переезд", "Продумать план переезда", Status.NEW);

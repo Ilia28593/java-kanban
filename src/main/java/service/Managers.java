@@ -7,11 +7,11 @@ import service.taskManager.TaskManager;
 
 public class Managers {
 
-    public static TaskManager getDefault() {
-        return new InMemoryTaskManager();
+    public TaskManager getDefaultTaskManager() {
+        return new InMemoryTaskManager(getHistory());
     }
 
-    public static HistoryManager getHistory() {
+    public HistoryManager getHistory() {
         return new InMemoryHistoryManager();
     }
 }
