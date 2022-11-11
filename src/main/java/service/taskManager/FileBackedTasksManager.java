@@ -32,7 +32,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
             writeAllElementOfList(fileWriter, listElement());
         } catch (IOException e) {
             e.printStackTrace();
-            throw new ManagerException("****************************");
+            throw new ManagerException("Сбой при сохранение файлов +_+");
         }
     }
 

@@ -11,60 +11,11 @@ import static model.Status.DONE;
 import static model.Status.IN_PROGRESS;
 
 public class Main {
+    final static Managers managers = new Managers();
 
     public static void main(String[] args) {
         write();
         read();
-    }
-
-
-    final static Managers managers = new Managers();
-
-    public void test1_5() {
-        final TaskManager manager = managers.getDefaultTaskManager();
-
-        EpicTask draiving = new EpicTask("Переезд", "Продумать план переезда", Status.NEW);
-        SubTask draiving1 = new SubTask("Собрать коробки", "Разложить вещи по коробкам", Status.NEW);
-        SubTask draiving2 = new SubTask("Найти компанию по перевозки грузов"
-                , "Заказать машину на определенный день", Status.NEW);
-
-
-        EpicTask birthday = new EpicTask("Празднование ДР", "Организовать вкусную еду", Status.NEW);
-        SubTask birthday1 = new SubTask("Посчитать количество гостей", "Сделать рассадку", Status.NEW);
-
-
-        manager.addEpicTask(draiving);
-        manager.addSubTask(draiving, draiving1);
-        manager.addSubTask(draiving, draiving2);
-        manager.addEpicTask(birthday);
-        manager.addSubTask(birthday, birthday1);
-        manager.printAllElement();
-        System.out.println("-----------------------------------------------");
-        manager.printHistoryElement();
-        System.out.println("-----------------------------------------------");
-        manager.changeEpicStatus(1, IN_PROGRESS);
-        manager.printHistoryElement();
-        System.out.println("-----------------------------------------------");
-
-        manager.changeSubtaskStatus(2, DONE);
-        manager.printHistoryElement();
-        System.out.println("-----------------------------------------------");
-
-        manager.changeSubtaskStatus(5, DONE);
-        manager.printHistoryElement();
-        System.out.println("-----------------------------------------------");
-
-        manager.updateEpicTask(draiving, birthday);
-        manager.printAllElement();
-        System.out.println("-----------------------------------------------");
-        manager.printHistoryElement();
-        System.out.println("-----------------------------------------------");
-
-        manager.removeByID(4);
-        manager.printAllElement();
-        System.out.println("-----------------------------------------------");
-        manager.printHistoryElement();
-
     }
 
     public static void write() {
@@ -83,10 +34,18 @@ public class Main {
         manager.addSubTask(driving, draiving2);
         manager.addEpicTask(birthday);
         manager.addSubTask(birthday, birthday1);
+
+        System.out.println("Были добавлены следующие задачи");
+        manager.printAllElement();
+        System.out.println("-----------------------------------------------");
+        System.out.println("Проверка history");
         manager.printHistoryElement();
         System.out.println("-----------------------------------------------");
+        System.out.println("Была запрошена таска с id1, проверка history");
         manager.getEpicTaskById(1);
+        manager.printHistoryElement();
         System.out.println("-----------------------------------------------");
+        System.out.println("Запрос на изменение SubTask c id5, должно также вызваться изменение id4, так как это единственная его сабтаска");
         manager.changeSubtaskStatus(5, DONE);
         manager.printHistoryElement();
         System.out.println("-----------------------------------------------");
@@ -95,9 +54,10 @@ public class Main {
     public static void read() {
         File f = new File("back-up file.csv");
         TaskManager manager = FileBackedTasksManager.loadFromFile(f);
-        System.out.println("*********************");
+        System.out.println("Загрузка с файла, были восстановлены следующие задачи");
         manager.printAllElement();
-        System.out.println("*********************");
+        System.out.println("-----------------------------------------------");
+        System.out.println("Загруженная history ");
         manager.printHistoryElement();
     }
 }
