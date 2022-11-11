@@ -25,8 +25,8 @@ public class CustomLinkedList {
     }
 
     public void linkLast(Task task) {
-        if(nodeMap.containsKey(task.getId())){
-            nodeMap.get(task.getId()).task=task;
+        if (nodeMap.containsKey(task.getId())) {
+            nodeMap.get(task.getId()).task = task;
         } else {
             final Node<Task> node = new Node<>(task, last, null);
             checkSize();
@@ -48,7 +48,8 @@ public class CustomLinkedList {
     }
 
     public void remove(int id) {
-        if (nodeMap.containsKey(id) && nodeMap.size()>0) {
+        if (nodeMap.containsKey(id)) {
+            nodeMap.size();
             Task task = nodeMap.get(id).task;
             if (checkInFirstAndSetNext(task)) return;
             Node<Task> currentNode = first;

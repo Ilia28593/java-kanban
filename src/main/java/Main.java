@@ -8,7 +8,6 @@ import service.taskManager.TaskManager;
 import java.io.File;
 
 import static model.Status.DONE;
-import static model.Status.IN_PROGRESS;
 
 public class Main {
     final static Managers managers = new Managers();
@@ -55,7 +54,6 @@ public class Main {
         manager.printAllElement();
         manager.printHistoryElement();
         System.out.println("-----------------------------------------------");
-
     }
 
     public static void read() {
