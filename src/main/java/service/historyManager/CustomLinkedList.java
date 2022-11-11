@@ -9,8 +9,8 @@ import java.util.Objects;
 
 public class CustomLinkedList {
     public final Map<Integer, Node<Task>> nodeMap = new HashMap<>();
-    private Node<Task> first;
-    private Node<Task> last;
+    private static Node<Task> first;
+    private static Node<Task> last;
     private int historySize;
 
     public ArrayList<Task> getTasks() {
@@ -25,16 +25,20 @@ public class CustomLinkedList {
     }
 
     public void linkLast(Task task) {
-        final Node<Task> node = new Node<>(task, last, null);
-        checkSize();
-        if (first == null) {
-            first = node;
+        if(nodeMap.containsKey(task.getId())){
+            nodeMap.get(task.getId()).task=task;
         } else {
-            last.next = node;
+            final Node<Task> node = new Node<>(task, last, null);
+            checkSize();
+            if (first == null) {
+                first = node;
+            } else {
+                last.next = node;
+            }
+            last = node;
+            nodeMap.put(task.getId(), node);
+            historySize++;
         }
-        last = node;
-        nodeMap.put(task.getId(), node);
-        historySize++;
     }
 
     private void checkSize() {
@@ -44,13 +48,13 @@ public class CustomLinkedList {
     }
 
     public void remove(int id) {
-        if (nodeMap.containsKey(id)) {
-            historySize--;
+        if (nodeMap.containsKey(id) && nodeMap.size()>0) {
             Task task = nodeMap.get(id).task;
             if (checkInFirstAndSetNext(task)) return;
             Node<Task> currentNode = first;
             if (updateNextInNew(task, currentNode)) return;
             nodeMap.remove(id);
+            historySize--;
         }
     }
 
@@ -58,7 +62,7 @@ public class CustomLinkedList {
         if (first == null) {
             return true;
         }
-        if (first.task == task) {
+        if (first.task.equals(task)) {
             first = first.next;
             return true;
         }
@@ -67,7 +71,7 @@ public class CustomLinkedList {
 
     private boolean updateNextInNew(Task task, Node<Task> currentNode) {
         while (currentNode.next != null) {
-            if (currentNode.next.task == task) {
+            if (currentNode.next.task.equals(task)) {
                 currentNode.next = currentNode.next.next;
                 return true;
             }
@@ -78,7 +82,7 @@ public class CustomLinkedList {
 }
 
 class Node<Task> {
-    final Task task;
+    Task task;
     Node<Task> next;
     Node<Task> before;
 

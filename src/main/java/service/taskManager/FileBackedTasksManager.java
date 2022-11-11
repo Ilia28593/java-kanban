@@ -215,6 +215,5 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     @Override
     public void cleanRepository() {
         super.cleanRepository();
-        save();
     }
 }

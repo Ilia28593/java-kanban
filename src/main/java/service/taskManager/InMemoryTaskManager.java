@@ -44,6 +44,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (repository.getSubTaskMap().containsKey(id)) {
             subTask = repository.getSubTaskMap().get(id);
         }
+        managerHistory.add(subTask);
         return subTask;
     }
 
@@ -158,7 +159,6 @@ public class InMemoryTaskManager implements TaskManager {
         managerHistory.remove(id);
     }
 
-
     private void removeElementInEpicTask(Integer id) {
         ((EpicTask) getEpicTaskById(id)).getSubtaskIds().forEach(ids -> {
             managerHistory.remove(ids);
@@ -168,15 +168,14 @@ public class InMemoryTaskManager implements TaskManager {
         repository.getEpicTaskMap().remove(id);
     }
 
-
     @Override
     public void cleanRepository() {
-        repository.getTaskMap().keySet().forEach(e -> managerHistory.remove(e));
+        repository.getEpicTaskMap().keySet().forEach(e -> managerHistory.remove(e));
         repository.getSubTaskMap().keySet().forEach(s -> managerHistory.remove(s));
         repository.getTaskMap().keySet().forEach(t -> managerHistory.remove(t));
-        repository.getEpicTaskList().clear();
-        repository.getSubtaskList().clear();
-        repository.getTaskList().clear();
+        repository.getEpicTaskMap().clear();
+        repository.getSubTaskMap().clear();
+        repository.getTaskMap().clear();
 
     }
 

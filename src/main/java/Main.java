@@ -49,6 +49,13 @@ public class Main {
         manager.changeSubtaskStatus(5, DONE);
         manager.printHistoryElement();
         System.out.println("-----------------------------------------------");
+        System.out.println("Отчищаем и историю и репозиторий");
+        manager.cleanRepository();
+        // я специально убрал сохранение при отчистке для демонстрации восстановления, в общем коде она будет
+        manager.printAllElement();
+        manager.printHistoryElement();
+        System.out.println("-----------------------------------------------");
+
     }
 
     public static void read() {
