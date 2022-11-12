@@ -2,6 +2,7 @@ package service.taskManager;
 
 import model.*;
 import repository.Repository;
+import service.Managers;
 import service.historyManager.HistoryManager;
 import service.historyManager.InMemoryHistoryManager;
 
@@ -13,7 +14,8 @@ import java.util.stream.Collectors;
 public class InMemoryTaskManager implements TaskManager {
 
     protected Repository repository = new Repository();
-    protected HistoryManager managerHistory = new InMemoryHistoryManager();
+    protected HistoryManager managerHistory = new Managers().getHistory();
+    // protected для доступа и фаилбекенд
 
     public InMemoryTaskManager() {
     }

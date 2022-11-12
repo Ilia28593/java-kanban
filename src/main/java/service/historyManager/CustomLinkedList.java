@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class CustomLinkedList {
-    public final Map<Integer, Node<Task>> nodeMap = new HashMap<>();
+    private final Map<Integer, Node<Task>> nodeMap = new HashMap<>();
     private static Node<Task> first;
     private static Node<Task> last;
     private int historySize;

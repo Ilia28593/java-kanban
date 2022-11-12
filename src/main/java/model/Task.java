@@ -10,20 +10,7 @@ import java.util.Objects;
 @Data
 @NoArgsConstructor
 public class Task extends Id {
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        Task task = (Task) o;
-        return Objects.equals(nameTask, task.nameTask) && Objects.equals(taskDetail, task.taskDetail) && status == task.status && type == task.type;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), nameTask, taskDetail, status, type);
-    }
-
+    
     protected String nameTask;
     protected String taskDetail;
     protected Status status;

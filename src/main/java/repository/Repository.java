@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Map;
 
 public class Repository {
-    private static final Map<Integer, Task> taskMap = new HashMap<>();
-    private static final Map<Integer, EpicTask> epicTaskMap = new HashMap<>();
-    private static final Map<Integer, SubTask> subTaskMap = new HashMap<>();
+    private final Map<Integer, Task> taskMap = new HashMap<>();
+    private final Map<Integer, EpicTask> epicTaskMap = new HashMap<>();
+    private final Map<Integer, SubTask> subTaskMap = new HashMap<>();
 
     public Map<Integer, Task> getTaskMap() {
         return taskMap;
