@@ -1,21 +1,22 @@
 package service.historyManager;
 
+import lombok.EqualsAndHashCode;
 import model.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class CustomLinkedList {
+    private final int MAX_SIZE_HISTORY = 10;
     private final Map<Integer, Node<Task>> nodeMap = new HashMap<>();
-    private static Node<Task> first;
-    private static Node<Task> last;
+    private Node<Task> first;
+    private Node<Task> last;
     private int historySize;
 
-    public ArrayList<Task> getTasks() {
-        ArrayList<Task> tasks = new ArrayList<>();
-
+    public List<Task> getTasks() {
+        List<Task> tasks = new ArrayList<>();
         Node<Task> node = first;
         while (node != null) {
             tasks.add(node.task);
@@ -42,7 +43,7 @@ public class CustomLinkedList {
     }
 
     private void checkSize() {
-        if (historySize >= 10) {
+        if (historySize >= MAX_SIZE_HISTORY) {
             remove(first.task.getId());
         }
     }
@@ -82,6 +83,7 @@ public class CustomLinkedList {
     }
 }
 
+@EqualsAndHashCode
 class Node<Task> {
     Task task;
     Node<Task> next;
@@ -91,18 +93,5 @@ class Node<Task> {
         this.task = task;
         this.next = next;
         this.before = before;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Node<?> node = (Node<?>) o;
-        return Objects.equals(task, node.task) && Objects.equals(next, node.next) && Objects.equals(before, node.before);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(task, next, before);
     }
 }

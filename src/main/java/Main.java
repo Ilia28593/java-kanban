@@ -10,7 +10,6 @@ import java.io.File;
 import static model.Status.DONE;
 
 public class Main {
-    final static Managers managers = new Managers();
 
     public static void main(String[] args) {
         write();
@@ -19,18 +18,18 @@ public class Main {
 
     public static void write() {
         File f = new File("back-up file.csv");
-        TaskManager manager = managers.getFileBacked(f);
+        TaskManager manager = Managers.getFileBacked(f);
 
         EpicTask driving = new EpicTask("Переезд", "Продумать план переезда", Status.NEW);
-        SubTask draiving1 = new SubTask("Собрать коробки", "Разложить вещи по коробкам", Status.NEW);
-        SubTask draiving2 = new SubTask("Найти компанию по перевозки грузов"
+        SubTask driving1 = new SubTask("Собрать коробки", "Разложить вещи по коробкам", Status.NEW);
+        SubTask driving2 = new SubTask("Найти компанию по перевозки грузов"
                 , "Заказать машину на определенный день", Status.NEW);
         EpicTask birthday = new EpicTask("Празднование ДР", "Организовать вкусную еду", Status.NEW);
         SubTask birthday1 = new SubTask("Посчитать количество гостей", "Сделать рассадку", Status.NEW);
 
         manager.addEpicTask(driving);
-        manager.addSubTask(driving, draiving1);
-        manager.addSubTask(driving, draiving2);
+        manager.addSubTask(driving, driving1);
+        manager.addSubTask(driving, driving2);
         manager.addEpicTask(birthday);
         manager.addSubTask(birthday, birthday1);
 
