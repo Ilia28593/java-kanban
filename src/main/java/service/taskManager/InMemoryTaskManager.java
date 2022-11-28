@@ -2,9 +2,12 @@ package service.taskManager;
 
 import model.*;
 import repository.Repository;
+import service.Exception.ManagerException;
 import service.Managers;
 import service.historyManager.HistoryManager;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -53,7 +56,7 @@ public class InMemoryTaskManager implements TaskManager {
         return new ArrayList<>() {{
             addAll(repository.getTaskList());
             addAll(repository.getEpicTaskList());
-            addAll(repository.getSubtaskList());
+            addAll(repository.getSubTaskList());
         }};
     }
 
@@ -98,21 +101,21 @@ public class InMemoryTaskManager implements TaskManager {
     public void changeEpicStatus(Integer id, Status status) {
         if (status.equals(Status.IN_PROGRESS) && getEpicTaskById(id).getStatus().equals(Status.NEW) &&
                 getEpicTaskById(id) != null) {
-            CheckStatusInSubTask(Status.IN_PROGRESS, (EpicTask) getEpicTaskById(id));
+            checkStatusInSubTask(Status.IN_PROGRESS, (EpicTask) getEpicTaskById(id));
         } else if (status.equals(Status.NEW) && getEpicTaskById(id) != null) {
-            CheckStatusInSubTask(Status.NEW, (EpicTask) getEpicTaskById(id));
+            checkStatusInSubTask(Status.NEW, (EpicTask) getEpicTaskById(id));
         }
     }
 
-    private void CheckStatusInSubTask(Status status, EpicTask epicTask) {
+    private void checkStatusInSubTask(Status status, EpicTask epicTask) {
         epicTask.setStatus(status);
         managerHistory.add(epicTask);
         if (epicTask.getSubtaskIds() != null) {
-            SetNewStatusInSubTask(epicTask, status);
+            setNewStatusInSubTask(epicTask, status);
         }
     }
 
-    private void SetNewStatusInSubTask(EpicTask epicTask, Status status) {
+    private void setNewStatusInSubTask(EpicTask epicTask, Status status) {
         epicTask.getSubtaskIds().forEach(id -> {
             getSubTaskById(id).setStatus(status);
             managerHistory.add(getSubTaskById(id));
@@ -128,7 +131,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     public void searchStatusDoneInChild(EpicTask task) {
-        boolean checkAllSubtaskIsDone = repository.getSubtaskList().stream()
+        boolean checkAllSubtaskIsDone = repository.getSubTaskList().stream()
                 .filter(t -> task.getSubtaskIds().contains(t.getId()))
                 .map(SubTask::getStatus)
                 .allMatch(Predicate.isEqual(Status.DONE));
@@ -142,7 +145,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeByID(Integer id) {
         if (!repository.getTaskList().isEmpty() && repository.getTaskMap().containsKey(id)) {
             removeTask(id);
-        } else if (!repository.getSubtaskList().isEmpty() && repository.getSubTaskMap().containsKey(id)) {
+        } else if (!repository.getSubTaskList().isEmpty() && repository.getSubTaskMap().containsKey(id)) {
             removeSubTask(id);
         } else if (!repository.getEpicTaskList().isEmpty() && repository.getEpicTaskMap().containsKey(id)) {
             removeElementInEpicTask(id);
@@ -176,7 +179,7 @@ public class InMemoryTaskManager implements TaskManager {
         repository.getEpicTaskMap().clear();
         repository.getSubTaskMap().clear();
         repository.getTaskMap().clear();
-
+        repository.getSortedTaskTree().clear();
     }
 
     @Override
@@ -194,6 +197,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (!repository.getEpicTaskMap().containsKey(epicTask.getId())) {
             epicTask.setType(Type.EPIC);
             repository.addEpicTaskMap(epicTask);
+            repository.addSorted(epicTask);
         } else {
             addEpicTask(new EpicTask(epicTask.getNameTask(), epicTask.getTaskDetail(), epicTask.getStatus()));
         }
@@ -225,9 +229,113 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public List<SubTask> getSubListOfEpic(EpicTask task) {
-        return repository.getSubtaskList().stream()
+        return repository.getSubTaskList().stream()
                 .filter(t -> task.getSubtaskIds().contains(t.getId()))
                 .collect(Collectors.toList());
+    }
+
+    public List<Task> getListTask() {
+        return repository.getTaskList();
+    }
+
+    @Override
+    public List<EpicTask> getListEpicTask() {
+        return repository.getEpicTaskList();
+    }
+
+    @Override
+    public List<SubTask> getListSubTask() {
+        return repository.getSubTaskList();
+    }
+
+    public void setEpicTaskTime(int id, LocalDateTime localDateTime, Long minutes) {
+        if (checkRepositoryTime(id, localDateTime, minutes)) {
+            EpicTask epicTask = (EpicTask) getEpicTaskById(id);
+            epicTask.setStart(localDateTime);
+            epicTask.setDurationMinutes(minutes);
+            planedFinishEpicTask(id);
+            addRepositoryTimeEpic(id);
+            repository.addSorted(epicTask);
+        }
+    }
+
+    public void setTaskTime(int id, LocalDateTime localDateTime, Long minutes) {
+        if (checkRepositoryTime(id, localDateTime, minutes)) {
+            Task task = getTaskById(id);
+            task.setStart(localDateTime);
+            task.setDurationMinutes(minutes);
+            addRepositoryTimeTask(id);
+            repository.addSorted(task);
+        }
+    }
+
+    public void setSubTaskTime(int id, LocalDateTime localDateTime, Long minutes) {
+        SubTask subTask = (SubTask) getSubTaskById(id);
+        if (checkRepositoryTime(subTask.getEpicId(), localDateTime, minutes)) {
+            subTask.setStart(localDateTime);
+            subTask.setDurationMinutes(minutes);
+            planedFinishEpicTask(subTask.getEpicId());
+            addRepositoryTimeEpic(subTask.getEpicId());
+            repository.addSorted(subTask);
+        }
+    }
+
+    private boolean checkRepositoryTime(int id, LocalDateTime timeStart, Long minutes) {
+        LocalDateTime timeInterval = timeStart;
+        boolean checkAdd = true;
+        boolean b = repository.getTimeCompletedTaskMap().containsKey(timeInterval);
+        try {
+            while (timeInterval.isBefore(timeStart.plusMinutes(minutes))) {
+                if (b) {
+                    if (repository.getTimeCompletedTaskMap().get(getTaskById(id).getStart()) != id) {
+                        System.out.println("Данное время уже зарезервировано для выполнения другой задачи");
+                        checkAdd = false;
+                        break;
+                    }
+                } else {
+                    timeInterval = timeInterval.plusMinutes(1);
+                }
+            }
+        } catch (NullPointerException e) {
+            throw new ManagerException("This time use in another Task");
+        }
+        return checkAdd;
+    }
+
+    private void addRepositoryTimeEpic(int id) {
+        LocalDateTime timeInterval = getEpicTaskById(id).getStart();
+        boolean b = repository.getTimeCompletedTaskMap().containsKey(timeInterval);
+        while (timeInterval.isBefore(getEpicTaskById(id).getFinish())) {
+            if (b) {
+                if (repository.getTimeCompletedTaskMap().get(timeInterval) == id) {
+                    repository.getTimeCompletedTaskMap().replace(timeInterval, id);
+                } else {
+                    repository.addTimeCompletedTaskMap(timeInterval, id);
+                }
+            } else {
+                repository.addTimeCompletedTaskMap(timeInterval, id);
+                timeInterval = timeInterval.plusMinutes(1);
+            }
+        }
+    }
+
+    private void addRepositoryTimeTask(int id) {
+        LocalDateTime timeInterval = getTaskById(id).getStart();
+        while (timeInterval.isBefore(getTaskById(id).getFinish())) {
+            if (repository.getTimeCompletedTaskMap().get(getTaskById(id).getStart()) == id) {
+                repository.getTimeCompletedTaskMap().replace(timeInterval, id);
+            } else {
+                repository.addTimeCompletedTaskMap(timeInterval, id);
+            }
+            timeInterval = timeInterval.plus(Duration.ofMinutes(1));
+        }
+    }
+
+    private void planedFinishEpicTask(int id) {
+        EpicTask epicTask = (EpicTask) getEpicTaskById(id);
+        epicTask.setFinish(epicTask.getStart().plus(epicTask.getDurationMinutes()));
+        epicTask.getSubtaskIds().forEach(s ->
+                epicTask.setFinish(epicTask.getFinish().plus(getSubTaskById(s).getDurationMinutes())));
     }
 
     public void printAllElement() {
@@ -236,5 +344,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     public void printHistoryElement() {
         managerHistory.getHistoryList().forEach(System.out::println);
+    }
+
+    public List<Task> getPrioritizedTasks() {
+        return new ArrayList<>(repository.getSortedTaskTree());
     }
 }

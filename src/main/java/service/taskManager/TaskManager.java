@@ -5,9 +5,18 @@ import model.Status;
 import model.SubTask;
 import model.Task;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface TaskManager {
+
+    List<Task> getPrioritizedTasks();
+
+    void setEpicTaskTime(int id, LocalDateTime localDateTime, Long minutes);
+
+    void setTaskTime(int id, LocalDateTime localDateTime, Long minutes);
+
+    void setSubTaskTime(int id, LocalDateTime localDateTime, Long minutes);
 
     void printHistoryElement();
 
@@ -42,6 +51,12 @@ public interface TaskManager {
     void addEpicTask(EpicTask epicTask);
 
     void addSubTask(EpicTask epicTask, SubTask subtask);
+
+    List<Task> getListTask();
+
+    List<EpicTask> getListEpicTask();
+
+    List<SubTask> getListSubTask();
 
     List<SubTask> getSubListOfEpic(EpicTask task);
 }

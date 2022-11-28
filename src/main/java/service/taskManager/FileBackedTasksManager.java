@@ -2,6 +2,7 @@ package service.taskManager;
 
 
 import model.*;
+import service.Exception.ManagerException;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -9,11 +10,13 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FileBackedTasksManager extends InMemoryTaskManager implements TaskManager {
-
+    private final static String DATE_TIME_FORMAT = "[dd.MM.yyyy]/[HH:mm]";
     private final String fileName;
 
     public FileBackedTasksManager(File file) {
@@ -61,13 +64,20 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     }
 
     private String transformSubTaskString(Task task) {
-        return String.format("%d,%s,%s,%s,%s,%d,%n", task.getId(), task.getType(), task.getNameTask(),
-                task.getStatus(), task.getTaskDetail(), ((SubTask) task).getEpicId());
+        return String.format("%d,%s,%s,%s,%s,%s,%d,%s,%d%n", task.getId(), task.getType(), task.getNameTask(),
+                task.getStatus(), task.getTaskDetail(), dateTimeToString(task.getStart()),
+                task.getDurationMinutes().toMinutes(), dateTimeToString(task.getFinish()), ((SubTask) task).getEpicId());
     }
 
     private String transformTaskAndEpicTaskToString(Task task) {
-        return String.format("%d,%s,%s,%s,%s%n", task.getId(), task.getType(), task.getNameTask(),
-                task.getStatus(), task.getTaskDetail());
+        return String.format("%d,%s,%s,%s,%s,%s,%d,%s,%n", task.getId(), task.getType(), task.getNameTask(),
+                task.getStatus(), task.getTaskDetail(), dateTimeToString(task.getStart()),
+                task.getDurationMinutes().toMinutes(), dateTimeToString(task.getFinish()));
+    }
+
+    private String dateTimeToString(LocalDateTime dateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
+        return dateTime.format(formatter);
     }
 
 
@@ -82,6 +92,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
             readContentFile(bufferKanban, splitContent);
         }
         return new FileBackedTasksManager(file.getName(), bufferKanban);
+    }
+
+    private static LocalDateTime stringDateTime(String string) {
+        return LocalDateTime.parse(string, DateTimeFormatter.ofPattern(DATE_TIME_FORMAT));
     }
 
     private static void readContentFile(InMemoryTaskManager bufferKanban, String[] splitContent) {
@@ -129,17 +143,23 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
             case TASK:
                 Task task = new Task(values[2], values[4], Status.valueOf(values[3]), Integer.parseInt(values[0]));
                 task.setType(Type.TASK);
+                task.setStart(stringDateTime(values[5]));
+                task.setDurationMinutes(Long.parseLong(values[6]));
                 bufferKanban.repository.addTaskMap(task);
                 break;
             case SUBTASK:
                 SubTask subTask = new SubTask(values[2], values[4], Status.valueOf(values[3]), Integer.parseInt(values[0]));
                 subTask.setType(Type.SUBTASK);
-                bufferKanban.repository.getEpicTaskMap().get(Integer.parseInt(values[5])).addSubtask(subTask);
+                bufferKanban.repository.getEpicTaskMap().get(Integer.parseInt(values[8])).addSubtask(subTask);
+                subTask.setStart(stringDateTime(values[5]));
+                subTask.setDurationMinutes(Long.parseLong(values[6]));
                 bufferKanban.repository.addSubtaskMap(subTask);
                 break;
             case EPIC:
                 EpicTask epicTask = new EpicTask(values[2], values[4], Status.valueOf(values[3]), Integer.parseInt(values[0]));
                 epicTask.setType(Type.EPIC);
+                epicTask.setStart(stringDateTime(values[5]));
+                epicTask.setDurationMinutes(Long.parseLong(values[6]));
                 bufferKanban.repository.addEpicTaskMap(epicTask);
                 break;
         }
@@ -215,5 +235,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     @Override
     public void cleanRepository() {
         super.cleanRepository();
+        save();
     }
 }

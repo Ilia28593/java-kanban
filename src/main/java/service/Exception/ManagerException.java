@@ -1,4 +1,4 @@
-package service.taskManager;
+package service.Exception;
 
 public class ManagerException extends RuntimeException {
     public ManagerException() {
