@@ -3,8 +3,8 @@ package service.taskManager;
 import lombok.NoArgsConstructor;
 import model.*;
 import repository.Repository;
-import service.Exception.IncorrectIdException;
-import service.Exception.TimeIntervalIsUsedException;
+import service.exception.IncorrectIdException;
+import service.exception.TimeIntervalIsUsedException;
 import service.Managers;
 import service.historyManager.HistoryManager;
 

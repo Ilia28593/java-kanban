@@ -1,4 +1,4 @@
-package service.Exception;
+package service.exception;
 
 public class ManagerException extends RuntimeException {
     public ManagerException() {

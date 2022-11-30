@@ -1,4 +1,4 @@
-package service.Exception;
+package service.exception;
 
 public class IncorrectIdException extends RuntimeException {
     public IncorrectIdException() {
