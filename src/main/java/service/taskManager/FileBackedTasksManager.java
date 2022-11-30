@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -31,8 +32,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
 
     private void save() throws ManagerException {
         try (FileWriter fileWriter = new FileWriter(fileName, StandardCharsets.UTF_8, false)) {
-            fileWriter.write("id,type,name,status,description,epic\n");
-            writeAllElementOfList(fileWriter, listElement());
+            if(repository.listElement().size()!=0) {
+                fileWriter.write("id,type,name,status,description,startTime,duration,endTime,epic\n");
+                writeAllElementOfList(fileWriter, repository.listElement());
+            }
         } catch (IOException e) {
             e.printStackTrace();
             throw new ManagerException("Сбой при сохранение файлов +_+");
@@ -144,7 +147,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
                 Task task = new Task(values[2], values[4], Status.valueOf(values[3]), Integer.parseInt(values[0]));
                 task.setType(Type.TASK);
                 task.setStart(stringDateTime(values[5]));
-                task.setDurationMinutes(Long.parseLong(values[6]));
+                task.setDurationMinutes(Duration.ofDays(Long.parseLong(values[6])));
                 bufferKanban.repository.addTaskMap(task);
                 break;
             case SUBTASK:
@@ -152,14 +155,14 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
                 subTask.setType(Type.SUBTASK);
                 bufferKanban.repository.getEpicTaskMap().get(Integer.parseInt(values[8])).addSubtask(subTask);
                 subTask.setStart(stringDateTime(values[5]));
-                subTask.setDurationMinutes(Long.parseLong(values[6]));
+                subTask.setDurationMinutes(Duration.ofDays(Long.parseLong(values[6])));
                 bufferKanban.repository.addSubtaskMap(subTask);
                 break;
             case EPIC:
                 EpicTask epicTask = new EpicTask(values[2], values[4], Status.valueOf(values[3]), Integer.parseInt(values[0]));
                 epicTask.setType(Type.EPIC);
                 epicTask.setStart(stringDateTime(values[5]));
-                epicTask.setDurationMinutes(Long.parseLong(values[6]));
+                epicTask.setDurationMinutes(Duration.ofDays(Long.parseLong(values[6])));
                 bufferKanban.repository.addEpicTaskMap(epicTask);
                 break;
         }
@@ -177,6 +180,24 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         SubTask subTask = (SubTask) super.getSubTaskById(id);
         save();
         return subTask;
+    }
+
+    @Override
+    public void addTask(Task task) {
+        super.addTask(task);
+        save();
+    }
+
+    @Override
+    public void addEpicTask(EpicTask epicTask) {
+        super.addEpicTask(epicTask);
+        save();
+    }
+
+    @Override
+    public void addSubTask(int id, SubTask subtask) {
+        super.addSubTask(id, subtask);
+        save();
     }
 
     @Override

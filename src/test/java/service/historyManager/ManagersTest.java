@@ -1,8 +1,6 @@
 package service.historyManager;
 
-import junit.framework.TestCase;
 import model.Status;
-import model.SubTask;
 import model.Task;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,7 +9,7 @@ import service.Managers;
 
 import java.util.List;
 
-public class ManagersTest extends TestCase {
+public class ManagersTest {
 
     private HistoryManager managerHistory;
     private Task task;
@@ -55,6 +53,7 @@ public class ManagersTest extends TestCase {
         final List<Task> history = managerHistory.getHistoryList();
         Assertions.assertEquals(2, history.size(), "История не пустая.");
     }
+
     @Test
     void removeEndElement() {
         managerHistory.add(task);

@@ -1,64 +1,56 @@
 package service.taskManager;
 
+import lombok.NoArgsConstructor;
 import model.*;
 import repository.Repository;
-import service.Exception.ManagerException;
+import service.Exception.IncorrectIdException;
+import service.Exception.TimeIntervalIsUsedException;
 import service.Managers;
 import service.historyManager.HistoryManager;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
+@NoArgsConstructor
 public class InMemoryTaskManager implements TaskManager {
 
     protected Repository repository = new Repository();
     protected HistoryManager managerHistory = Managers.getHistory();
 
-    public InMemoryTaskManager() {
-    }
-
     @Override
     public Task getTaskById(int id) {
-        Task task = null;
         if (repository.getTaskMap().containsKey(id)) {
-            task = repository.getTaskMap().get(id);
+            managerHistory.add(repository.getTaskMap().get(id));
+            return repository.getTaskMap().get(id);
+        } else {
+            throw new IncorrectIdException("Task from this id no search");
         }
-        managerHistory.add(task);
-        return task;
     }
 
     @Override
     public Task getEpicTaskById(int id) {
-        EpicTask epicTask = null;
         if (repository.getEpicTaskMap().containsKey(id)) {
-            epicTask = repository.getEpicTaskMap().get(id);
-            managerHistory.add(epicTask);
+            managerHistory.add(repository.getEpicTaskMap().get(id));
+            return repository.getEpicTaskMap().get(id);
+        } else {
+            throw new IncorrectIdException("Task from this id no search");
         }
-        return epicTask;
     }
 
     @Override
     public Task getSubTaskById(int id) {
-        SubTask subTask = null;
         if (repository.getSubTaskMap().containsKey(id)) {
-            subTask = repository.getSubTaskMap().get(id);
+            managerHistory.add(repository.getSubTaskMap().get(id));
+            return repository.getSubTaskMap().get(id);
+        } else {
+            throw new IncorrectIdException("Task from this id no search");
         }
-        managerHistory.add(subTask);
-        return subTask;
     }
 
-    @Override
-    public List<Task> listElement() {
-        return new ArrayList<>() {{
-            addAll(repository.getTaskList());
-            addAll(repository.getEpicTaskList());
-            addAll(repository.getSubTaskList());
-        }};
-    }
 
     @Override
     public Task updateTask(Task task, Task newTask) {
@@ -86,6 +78,8 @@ public class InMemoryTaskManager implements TaskManager {
         task.setNameTask(newTask.getNameTask() != null ? newTask.getNameTask() : task.getNameTask());
         task.setTaskDetail(newTask.getTaskDetail() != null ? newTask.getTaskDetail() : task.getTaskDetail());
         task.setStatus(newTask.getStatus() != null ? newTask.getStatus() : task.getStatus());
+        task.setStart(newTask.getStart());
+        task.setDurationMinutes(newTask.getDurationMinutes());
     }
 
     @Override
@@ -131,7 +125,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     public void searchStatusDoneInChild(EpicTask task) {
-        boolean checkAllSubtaskIsDone = repository.getSubTaskList().stream()
+        boolean checkAllSubtaskIsDone = repository.getSubTaskMap().values().stream()
                 .filter(t -> task.getSubtaskIds().contains(t.getId()))
                 .map(SubTask::getStatus)
                 .allMatch(Predicate.isEqual(Status.DONE));
@@ -143,11 +137,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeByID(Integer id) {
-        if (!repository.getTaskList().isEmpty() && repository.getTaskMap().containsKey(id)) {
+        if (!repository.getTaskMap().values().isEmpty() && repository.getTaskMap().containsKey(id)) {
             removeTask(id);
-        } else if (!repository.getSubTaskList().isEmpty() && repository.getSubTaskMap().containsKey(id)) {
+        } else if (!repository.getSubTaskMap().values().isEmpty() && repository.getSubTaskMap().containsKey(id)) {
             removeSubTask(id);
-        } else if (!repository.getEpicTaskList().isEmpty() && repository.getEpicTaskMap().containsKey(id)) {
+        } else if (!repository.getEpicTaskMap().values().isEmpty() && repository.getEpicTaskMap().containsKey(id)) {
             removeElementInEpicTask(id);
         }
     }
@@ -175,171 +169,163 @@ public class InMemoryTaskManager implements TaskManager {
     public void cleanRepository() {
         repository.getEpicTaskMap().keySet().forEach(e -> managerHistory.remove(e));
         repository.getSubTaskMap().keySet().forEach(s -> managerHistory.remove(s));
-        repository.getTaskMap().keySet().forEach(t -> managerHistory.remove(t));
-        repository.getEpicTaskMap().clear();
-        repository.getSubTaskMap().clear();
-        repository.getTaskMap().clear();
-        repository.getSortedTaskTree().clear();
+        repository.getTaskMap().keySet().forEach(t -> {
+            managerHistory.remove(t);
+        });
+        new Task(0);
+        repository.cleanRepository();
+
     }
 
     @Override
     public void addTask(Task task) {
-        if (!repository.getTaskMap().containsKey(task.getId())) {
-            task.setType(Type.TASK);
-            repository.addTaskMap(task);
-        } else {
-            addTask(new Task(task.getNameTask(), task.getTaskDetail(), task.getStatus()));
+        if (checkFreeTimeInTask(task.getStart(), task.getDurationMinutes().toMinutes(), task.getId())) {
+            if (!repository.getTaskMap().containsKey(task.getId())) {
+                task.setType(Type.TASK);
+                repository.addTaskMap(task);
+                setTaskTime(task.getId(), task.getStart(), task.getDurationMinutes().toMinutes());
+            } else {
+                addTask(new Task(task.getNameTask(), task.getTaskDetail(), task.getStatus()));
+            }
         }
     }
 
     @Override
     public void addEpicTask(EpicTask epicTask) {
-        if (!repository.getEpicTaskMap().containsKey(epicTask.getId())) {
-            epicTask.setType(Type.EPIC);
-            repository.addEpicTaskMap(epicTask);
-            repository.addSorted(epicTask);
-        } else {
-            addEpicTask(new EpicTask(epicTask.getNameTask(), epicTask.getTaskDetail(), epicTask.getStatus()));
-        }
+//        if (checkFreeTimeInTask(epicTask.getStart(), epicTask.getDurationMinutes().toMinutes(), epicTask.getId())) {
+            if (!repository.getEpicTaskMap().containsKey(epicTask.getId())) {
+                epicTask.setType(Type.EPIC);
+                repository.addEpicTaskMap(epicTask);
+//                repository.addSorted(epicTask);
+//                setEpicTaskTime(epicTask.getId(), epicTask.getStart(), epicTask.getDurationMinutes().toMinutes());
+            } else {
+                addEpicTask(new EpicTask(epicTask.getNameTask(), epicTask.getTaskDetail(), epicTask.getStatus()));
+            }
+  //      }
     }
 
     @Override
-    public void addSubTask(EpicTask epicTask, SubTask subtask) {
-        if (!repository.getSubTaskMap().containsKey(subtask.getId())) {
-            checkStatusInFamilyEpic(epicTask, subtask);
-            epicTask.addSubtask(subtask);
-            subtask.setType(Type.SUBTASK);
-            repository.addSubtaskMap(subtask);
-        } else {
-            addSubTask(epicTask, new SubTask(subtask.getNameTask(), subtask.getTaskDetail(), subtask.getStatus()));
+    public void addSubTask(int id, SubTask subtask) {
+        if (checkFreeTimeInTask(subtask.getStart(), subtask.getDurationMinutes().toMinutes(), subtask.getId())) {
+            if (!repository.getSubTaskMap().containsKey(subtask.getId())) {
+                checkStatusInFamilyEpic(id, subtask);
+                repository.getEpicTaskMap().get(id).addSubtask(subtask);
+                subtask.setType(Type.SUBTASK);
+                repository.addSubtaskMap(subtask);
+                setSubTaskTime(subtask.getId(), subtask.getStart(), subtask.getDurationMinutes().toMinutes());
+            } else {
+                addSubTask(id, new SubTask(subtask.getNameTask(), subtask.getTaskDetail(), subtask.getStatus()));
+            }
         }
     }
 
-    private void checkStatusInFamilyEpic(EpicTask epicTask, SubTask subtask) {
-        if (epicTask.getStatus().equals(Status.DONE)) {
-            epicTask.setStatus(Status.IN_PROGRESS);
+    private void checkStatusInFamilyEpic(int epicTaskId, SubTask subtask) {
+        EpicTask epicTask1 = repository.getEpicTaskMap().get(epicTaskId);
+        if (epicTask1.getStatus().equals(Status.DONE)) {
+            epicTask1.setStatus(Status.IN_PROGRESS);
             subtask.setStatus(Status.IN_PROGRESS);
-            managerHistory.add(epicTask);
+            managerHistory.add(epicTask1);
             managerHistory.add(subtask);
-        } else if (epicTask.getStatus().equals(Status.IN_PROGRESS)) {
+        } else if (epicTask1.getStatus().equals(Status.IN_PROGRESS)) {
             subtask.setStatus(Status.IN_PROGRESS);
             managerHistory.add(subtask);
         }
-    }
-
-    @Override
-    public List<SubTask> getSubListOfEpic(EpicTask task) {
-        return repository.getSubTaskList().stream()
-                .filter(t -> task.getSubtaskIds().contains(t.getId()))
-                .collect(Collectors.toList());
     }
 
     public List<Task> getListTask() {
-        return repository.getTaskList();
+        return new ArrayList<>(repository.getTaskMap().values());
     }
 
     @Override
     public List<EpicTask> getListEpicTask() {
-        return repository.getEpicTaskList();
+        return new ArrayList<>(repository.getEpicTaskMap().values());
     }
 
     @Override
     public List<SubTask> getListSubTask() {
-        return repository.getSubTaskList();
+        return new ArrayList<>(repository.getSubTaskMap().values());
     }
 
     public void setEpicTaskTime(int id, LocalDateTime localDateTime, Long minutes) {
-        if (checkRepositoryTime(id, localDateTime, minutes)) {
-            EpicTask epicTask = (EpicTask) getEpicTaskById(id);
-            epicTask.setStart(localDateTime);
-            epicTask.setDurationMinutes(minutes);
+        if (checkFreeTimeInTask(localDateTime, minutes, id)) {
+            getEpicTaskById(id).setStart(localDateTime);
             planedFinishEpicTask(id);
-            addRepositoryTimeEpic(id);
-            repository.addSorted(epicTask);
+            repository.addSorted(getEpicTaskById(id));
         }
     }
 
     public void setTaskTime(int id, LocalDateTime localDateTime, Long minutes) {
-        if (checkRepositoryTime(id, localDateTime, minutes)) {
-            Task task = getTaskById(id);
-            task.setStart(localDateTime);
-            task.setDurationMinutes(minutes);
-            addRepositoryTimeTask(id);
-            repository.addSorted(task);
+        if (checkFreeTimeInTask(localDateTime, minutes, id)) {
+            repository.getTaskMap().get(id).setStart(localDateTime);
+            repository.getTaskMap().get(id).setDurationMinutes(Duration.ofMinutes(minutes));
+            repository.getTaskMap().get(id).setFinish(localDateTime.plusMinutes(minutes));
+            repository.addSorted(repository.getTaskMap().get(id));
         }
     }
 
     public void setSubTaskTime(int id, LocalDateTime localDateTime, Long minutes) {
-        SubTask subTask = (SubTask) getSubTaskById(id);
-        if (checkRepositoryTime(subTask.getEpicId(), localDateTime, minutes)) {
+        SubTask subTask = repository.getSubTaskMap().get(id);
+        planedFinishEpicTask(subTask.getEpicId());
+        if (checkFreeTimeInTask(localDateTime, minutes, id)) {
             subTask.setStart(localDateTime);
-            subTask.setDurationMinutes(minutes);
-            planedFinishEpicTask(subTask.getEpicId());
-            addRepositoryTimeEpic(subTask.getEpicId());
+            subTask.setDurationMinutes(Duration.ofMinutes(minutes));
+            repository.getSubTaskMap().get(id).setFinish(localDateTime.plusMinutes(minutes));
             repository.addSorted(subTask);
-        }
-    }
-
-    private boolean checkRepositoryTime(int id, LocalDateTime timeStart, Long minutes) {
-        LocalDateTime timeInterval = timeStart;
-        boolean checkAdd = true;
-        boolean b = repository.getTimeCompletedTaskMap().containsKey(timeInterval);
-        try {
-            while (timeInterval.isBefore(timeStart.plusMinutes(minutes))) {
-                if (b) {
-                    if (repository.getTimeCompletedTaskMap().get(getTaskById(id).getStart()) != id) {
-                        System.out.println("Данное время уже зарезервировано для выполнения другой задачи");
-                        checkAdd = false;
-                        break;
-                    }
-                } else {
-                    timeInterval = timeInterval.plusMinutes(1);
-                }
-            }
-        } catch (NullPointerException e) {
-            throw new ManagerException("This time use in another Task");
-        }
-        return checkAdd;
-    }
-
-    private void addRepositoryTimeEpic(int id) {
-        LocalDateTime timeInterval = getEpicTaskById(id).getStart();
-        boolean b = repository.getTimeCompletedTaskMap().containsKey(timeInterval);
-        while (timeInterval.isBefore(getEpicTaskById(id).getFinish())) {
-            if (b) {
-                if (repository.getTimeCompletedTaskMap().get(timeInterval) == id) {
-                    repository.getTimeCompletedTaskMap().replace(timeInterval, id);
-                } else {
-                    repository.addTimeCompletedTaskMap(timeInterval, id);
-                }
-            } else {
-                repository.addTimeCompletedTaskMap(timeInterval, id);
-                timeInterval = timeInterval.plusMinutes(1);
-            }
-        }
-    }
-
-    private void addRepositoryTimeTask(int id) {
-        LocalDateTime timeInterval = getTaskById(id).getStart();
-        while (timeInterval.isBefore(getTaskById(id).getFinish())) {
-            if (repository.getTimeCompletedTaskMap().get(getTaskById(id).getStart()) == id) {
-                repository.getTimeCompletedTaskMap().replace(timeInterval, id);
-            } else {
-                repository.addTimeCompletedTaskMap(timeInterval, id);
-            }
-            timeInterval = timeInterval.plus(Duration.ofMinutes(1));
+        } else {
+            throw new TimeIntervalIsUsedException("This time is used another Task");
         }
     }
 
     private void planedFinishEpicTask(int id) {
-        EpicTask epicTask = (EpicTask) getEpicTaskById(id);
-        epicTask.setFinish(epicTask.getStart().plus(epicTask.getDurationMinutes()));
-        epicTask.getSubtaskIds().forEach(s ->
-                epicTask.setFinish(epicTask.getFinish().plus(getSubTaskById(s).getDurationMinutes())));
+        EpicTask epicTask = repository.getEpicTaskMap().get(id);
+        LocalDateTime finish = epicTask.getStart().plusMinutes(epicTask.getDurationMinutes().toMinutes());
+        epicTask.getSubtaskIds().forEach(s -> finish.plusMinutes(repository.getSubTaskMap()
+                .get(s).getDurationMinutes().toMinutes()));
+        epicTask.setFinish(finish);
+    }
+
+    public boolean checkFreeTimeInTask(LocalDateTime localDateTime, Long duration, int taskId) {
+        LocalDateTime start = localDateTime;
+        LocalDateTime finish = start.plusMinutes(duration);
+        boolean flag = true;
+        if (!start.equals(LocalDateTime.of(1993, 11, 2, 11, 30))) {
+            while (start.isBefore(finish)) {
+                LocalDateTime finalCorrectStart = transformToCorrectTime(start);
+                if (repository.getCheckFreeTime().keySet().parallelStream().anyMatch(s -> s.equals(finalCorrectStart))) {
+                    if (repository.getCheckFreeTime().get(transformToCorrectTime(start)) == taskId) {
+                        start = start.plusMinutes(15L);
+                    } else {
+                        flag = false;
+                        break;
+                    }
+                } else {
+                    repository.getCheckFreeTime().put(transformToCorrectTime(start), taskId);
+                    start = start.plusMinutes(15L);
+                }
+            }
+        }
+        return flag;
+    }
+
+    private LocalDateTime transformToCorrectTime(LocalDateTime minute) {
+        LocalTime timeOfNew = LocalTime.of(minute.toLocalTime().getHour(), timeInterval15Min(minute.toLocalTime().getMinute()));
+        return LocalDateTime.of(minute.toLocalDate(), timeOfNew);
+    }
+
+    private int timeInterval15Min(int minute) {
+        if (minute < 15) {
+            return 10;
+        } else if (minute < 30) {
+            return 20;
+        } else if (minute < 45) {
+            return 30;
+        } else {
+            return 40;
+        }
     }
 
     public void printAllElement() {
-        listElement().forEach(System.out::println);
+        repository.listElement().forEach(System.out::println);
     }
 
     public void printHistoryElement() {

@@ -28,12 +28,12 @@ public class EpicTask extends Task {
         super(nameTask, taskDetail, status, type);
     }
 
-    public EpicTask(String nameTask, String taskDetail, Status status, Type type, LocalDateTime startTime, Duration duration) {
-        super(nameTask, taskDetail, status, type, startTime, duration);
+    public EpicTask(String nameTask, String taskDetail, Status status, LocalDateTime startTime, Duration duration) {
+        super(nameTask, taskDetail, status, startTime, duration);
     }
 
-    public EpicTask(String nameTask, String taskDetail, Status status, Type type, LocalDateTime startTime, Duration duration, int id) {
-        super(nameTask, taskDetail, status, type, startTime, duration, id);
+    public EpicTask(String nameTask, String taskDetail, Status status, LocalDateTime startTime, Duration duration, int id) {
+        super(nameTask, taskDetail, status, startTime, duration, id);
     }
 
     public void addSubtask(SubTask subtaskIds) {
@@ -41,8 +41,8 @@ public class EpicTask extends Task {
         this.subtaskIds.add(subtaskIds.id);
     }
 
-    public void setFinish(Duration sumSubTaskDuration) {
-        this.finish = start.plus(durationMinutes.plus(sumSubTaskDuration));
+    public void setFinishAllSubTask(Duration sumSubTaskDuration) {
+        this.finish = start.plusMinutes(durationMinutes.plusMinutes(sumSubTaskDuration.toMinutes()).toMinutes());
     }
 
     @Override
@@ -53,6 +53,9 @@ public class EpicTask extends Task {
                 ", taskDetail='" + taskDetail + '\'' +
                 ", status=" + status +
                 ", subtask=" + subtaskIds +
+                ", type=" + type +
+                ", startTime=" + start +
+                ", duration=" + durationMinutes.toMinutes() +
                 '}';
     }
 }

@@ -6,6 +6,8 @@ import service.taskManager.FileBackedTasksManager;
 import service.taskManager.TaskManager;
 
 import java.io.File;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 import static model.Status.DONE;
 
@@ -20,18 +22,22 @@ public class Main {
         File f = new File("back-up file.csv");
         TaskManager manager = Managers.getFileBacked(f);
 
-        EpicTask driving = new EpicTask("Переезд", "Продумать план переезда", Status.NEW);
-        SubTask driving1 = new SubTask("Собрать коробки", "Разложить вещи по коробкам", Status.NEW);
+        EpicTask driving = new EpicTask("Переезд", "Продумать план переезда", Status.NEW,
+                LocalDateTime.of(2022,11,15,13,17), Duration.ofMinutes(22));
+        SubTask driving1 = new SubTask("Собрать коробки", "Разложить вещи по коробкам", Status.NEW,
+                LocalDateTime.of(2022,11,15,18,17), Duration.ofMinutes(59));
         SubTask driving2 = new SubTask("Найти компанию по перевозки грузов"
                 , "Заказать машину на определенный день", Status.NEW);
-        EpicTask birthday = new EpicTask("Празднование ДР", "Организовать вкусную еду", Status.NEW);
-        SubTask birthday1 = new SubTask("Посчитать количество гостей", "Сделать рассадку", Status.NEW);
+        EpicTask birthday = new EpicTask("Празднование ДР", "Организовать вкусную еду", Status.NEW,
+                LocalDateTime.of(2022,11,15,13,17), Duration.ofMinutes(3));
+        SubTask birthday1 = new SubTask("Посчитать количество гостей", "Сделать рассадку", Status.NEW,
+                LocalDateTime.of(2022,12,15,13,17), Duration.ofMinutes(48));
 
         manager.addEpicTask(driving);
-        manager.addSubTask(driving, driving1);
-        manager.addSubTask(driving, driving2);
+        manager.addSubTask(driving.getId(), driving1);
+        manager.addSubTask(driving.getId(), driving2);
         manager.addEpicTask(birthday);
-        manager.addSubTask(birthday, birthday1);
+        manager.addSubTask(birthday.getId(), birthday1);
 
         System.out.println("Были добавлены следующие задачи");
         manager.printAllElement();
@@ -45,12 +51,6 @@ public class Main {
         System.out.println("-----------------------------------------------");
         System.out.println("Запрос на изменение SubTask c id5, должно также вызваться изменение id4, так как это единственная его сабтаска");
         manager.changeSubtaskStatus(5, DONE);
-        manager.printHistoryElement();
-        System.out.println("-----------------------------------------------");
-        System.out.println("Отчищаем и историю и репозиторий");
-        manager.cleanRepository();
-        // я специально убрал сохранение при отчистке для демонстрации восстановления, в общем коде она будет
-        manager.printAllElement();
         manager.printHistoryElement();
         System.out.println("-----------------------------------------------");
     }

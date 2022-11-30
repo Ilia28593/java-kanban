@@ -28,8 +28,6 @@ public interface TaskManager {
 
     Task getSubTaskById(int id);
 
-    List<Task> listElement();
-
     Task updateTask(Task task, Task newTask);
 
     Task updateEpicTask(EpicTask task, EpicTask newTask);
@@ -50,14 +48,12 @@ public interface TaskManager {
 
     void addEpicTask(EpicTask epicTask);
 
-    void addSubTask(EpicTask epicTask, SubTask subtask);
+    void addSubTask(int epicTask, SubTask subtask);
 
     List<Task> getListTask();
 
     List<EpicTask> getListEpicTask();
 
     List<SubTask> getListSubTask();
-
-    List<SubTask> getSubListOfEpic(EpicTask task);
 }
 

@@ -16,21 +16,28 @@ public class SubTask extends Task {
     public SubTask(String nameTask, String taskDetail, Status status) {
         super(nameTask, taskDetail, status);
     }
+
     public SubTask(String nameTask, String taskDetail, Status status, int id) {
-        super(nameTask, taskDetail, status,id);
-        this.id=id;
+        super(nameTask, taskDetail, status, id);
+        this.id = id;
     }
 
     public SubTask(String nameTask, String taskDetail, Status status, Type type) {
         super(nameTask, taskDetail, status, type);
     }
 
-    public SubTask(String nameTask, String taskDetail, Status status, Type type, LocalDateTime startTime, Duration duration) {
-        super(nameTask, taskDetail, status, type, startTime, duration);
+    public SubTask(String nameTask, String taskDetail, Status status, LocalDateTime startTime, Duration duration) {
+        super(nameTask, taskDetail, status, startTime, duration);
     }
 
-    public SubTask(String nameTask, String taskDetail, Status status, Type type, LocalDateTime startTime, Duration duration, int id) {
-        super(nameTask, taskDetail, status, type, startTime, duration, id);
+    public SubTask(String nameTask, String taskDetail, Status status, LocalDateTime startTime, Duration duration, int id,int epicId) {
+        super(nameTask, taskDetail, status, startTime, duration, id);
+        this.epicId=epicId;
+    }
+
+    public SubTask(String nameTask, String taskDetail, Status status, LocalDateTime startTime, Duration duration, int id) {
+        super(nameTask, taskDetail, status, startTime, duration);
+        epicId=id;
     }
 
     @Override
@@ -41,6 +48,9 @@ public class SubTask extends Task {
                 ", nameTask='" + nameTask + '\'' +
                 ", taskDetail='" + taskDetail + '\'' +
                 ", status=" + status +
+                ", type=" + type +
+                ", startTime=" + start +
+                ", duration=" + durationMinutes.toMinutes() +
                 '}';
     }
 }

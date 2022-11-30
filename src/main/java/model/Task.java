@@ -17,19 +17,19 @@ public class Task extends Id {
     protected String taskDetail;
     protected Status status;
     protected Type type;
-    protected Duration durationMinutes = Duration.ofMinutes(1);
+    protected Duration durationMinutes = Duration.ofMinutes(1L);
     protected LocalDateTime start = DEFAULT_START_TIME;
     protected LocalDateTime finish = start.plusMinutes(durationMinutes.toMinutes());
-
-    public void setDurationMinutes(Long i) {
-        this.durationMinutes = Duration.ofMinutes(i);
-    }
 
     public Task(String nameTask, String taskDetail, Status status) {
         super();
         this.nameTask = nameTask;
         this.taskDetail = taskDetail;
         this.status = status;
+    }
+
+    public Task(int ids){
+        super(ids);
     }
 
     public Task(String nameTask, String taskDetail, Status status, int id) {
@@ -46,22 +46,20 @@ public class Task extends Id {
         this.type = type;
     }
 
-    public Task(String nameTask, String taskDetail, Status status, Type type, LocalDateTime startTime,
+    public Task(String nameTask, String taskDetail, Status status, LocalDateTime startTime,
                 Duration duration) {
         this.nameTask = nameTask;
         this.taskDetail = taskDetail;
         this.status = status;
-        this.type = type;
         this.start = startTime;
         this.durationMinutes = duration;
     }
 
-    public Task(String nameTask, String taskDetail, Status status,Type type, LocalDateTime startTime,
+    public Task(String nameTask, String taskDetail, Status status, LocalDateTime startTime,
                 Duration duration, int id) {
         this.nameTask = nameTask;
         this.taskDetail = taskDetail;
         this.status = status;
-        this.type = type;
         this.start = startTime;
         this.durationMinutes = duration;
         this.id = id;
@@ -74,6 +72,9 @@ public class Task extends Id {
                 ", taskDetail='" + taskDetail + '\'' +
                 ", status=" + status +
                 ", id=" + id +
+                ", type=" + type +
+                ", startTime=" + start +
+                ", duration=" + durationMinutes.toMinutes() +
                 '}';
     }
 }

@@ -1,12 +1,14 @@
 package model;
 
-import junit.framework.TestCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import service.Managers;
 import service.taskManager.TaskManager;
 
-public class EpicTaskTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class EpicTaskTest {
 
     private TaskManager manager;
     private EpicTask driving;
@@ -22,14 +24,8 @@ public class EpicTaskTest extends TestCase {
         driving2 = new SubTask("Найти компанию по перевозки грузов"
                 , "Заказать машину на определенный день", Status.NEW);
         manager.addEpicTask(driving);
-        manager.addSubTask(driving, driving1);
-        manager.addSubTask(driving, driving2);
-    }
-
-    @Test
-    public void testEpicGetSubtaskIdsSize2() {
-        assertNotNull(manager.getSubListOfEpic(driving));
-        assertEquals(2, manager.getSubListOfEpic(driving).size());
+        manager.addSubTask(driving.getId(), driving1);
+        manager.addSubTask(driving.getId(), driving2);
     }
 
     @Test
