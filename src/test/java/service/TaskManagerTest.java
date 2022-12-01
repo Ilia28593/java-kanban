@@ -126,6 +126,7 @@ public class TaskManagerTest extends InMemoryTaskManager {
     }
 
     public void testSetEpicTaskTimeToCompleted(TaskManager manager, EpicTask epicTask, SubTask subTask, Task task) {
+        manager.cleanRepository();
         manager.addTask(task);
         manager.setTaskTime(task.getId(), LocalDateTime.of(2022, 12, 31, 23, 59), 25L);
         manager.addEpicTask(epicTask);
@@ -133,7 +134,7 @@ public class TaskManagerTest extends InMemoryTaskManager {
         LocalDateTime localDateTime = LocalDateTime.of(2022, 11, 2, 13, 0);
         long duaretionOfEpic = 120L;
         manager.setEpicTaskTime(epicTask.getId(), localDateTime, duaretionOfEpic);
-        assertEquals(manager.getPrioritizedTasks().size(), 2);
+        assertEquals(manager.getPrioritizedTasks().size(), 3);
     }
 
 

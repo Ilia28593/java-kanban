@@ -62,16 +62,16 @@ class FileBackedTasksManagerTest<T extends TaskManager> {
             String line = "id,type,name,status,description,startTime,duration,endTime,epic";
             String lineCheck = lines[0];
             assertEquals(line, lineCheck);
-            String line1 = "1,TASK,Режим салатики ^_^,NEW,Оливье и селедка под шубой,31.12.2022/18:00,45,31.12.2022/18:45,";
+            String line1 = "1,TASK,Режим салатики ^_^,NEW,Оливье и селедка под шубой,31.12.2022/18:00,45,31.12.2022/18:45";
             String lineCheck1 = lines[1];
             assertEquals(line1, lineCheck1);
-            String line2 = "2,EPIC,-_-,NEW,=),02.11.1993/11:30,1,02.11.1993/11:31,";
+            String line2 = "2,EPIC,-_-,NEW,=)";
             String lineCheck2 = lines[2];
             assertEquals(line2, lineCheck2);
-            String line3 = "3,SUBTASK,O_o,NEW,:),13.12.2022/18:00,30,13.12.2022/18:30,2";
+            String line3 = "3,SUBTASK,O_o,NEW,:),2,13.12.2022/18:00,30,13.12.2022/18:30";
             String lineCheck3 = lines[3];
             assertEquals(line3, lineCheck3);
-            String line4 = "4,SUBTASK,+_+,NEW,|_|,24.11.2022/14:00,37,24.11.2022/14:37,2";
+            String line4 = "4,SUBTASK,+_+,NEW,|_|,2,24.11.2022/14:00,37,24.11.2022/14:37";
             String lineCheck4 = lines[4];
             assertEquals(line4, lineCheck4);
             String line5 = "";
@@ -110,16 +110,16 @@ class FileBackedTasksManagerTest<T extends TaskManager> {
             String line = "id,type,name,status,description,startTime,duration,endTime,epic";
             String lineCheck = lines[0];
             assertEquals(line, lineCheck);
-            String line1 = "1,TASK,Режим салатики ^_^,NEW,Оливье и селедка под шубой,31.12.2022/18:00,45,31.12.2022/18:45,";
+            String line1 = "1,TASK,Режим салатики ^_^,NEW,Оливье и селедка под шубой,31.12.2022/18:00,45,31.12.2022/18:45";
             String lineCheck1 = lines[1];
             assertEquals(line1, lineCheck1);
-            String line2 = "2,EPIC,-_-,NEW,=),02.11.1993/11:30,1,02.11.1993/11:31,";
+            String line2 = "2,EPIC,-_-,NEW,=)";
             String lineCheck2 = lines[2];
             assertEquals(line2, lineCheck2);
-            String line3 = "3,SUBTASK,O_o,NEW,:),13.12.2022/18:00,30,13.12.2022/18:30,2";
+            String line3 = "3,SUBTASK,O_o,NEW,:),2,13.12.2022/18:00,30,13.12.2022/18:30";
             String lineCheck3 = lines[3];
             assertEquals(line3, lineCheck3);
-            String line4 = "4,SUBTASK,+_+,NEW,|_|,24.11.2022/14:00,37,24.11.2022/14:37,2";
+            String line4 = "4,SUBTASK,+_+,NEW,|_|,2,24.11.2022/14:00,37,24.11.2022/14:37";
             String lineCheck4 = lines[4];
             assertEquals(line4, lineCheck4);
         } catch (IOException e) {
@@ -138,11 +138,11 @@ class FileBackedTasksManagerTest<T extends TaskManager> {
             String expectedLine1 = "id,type,name,status,description,startTime,duration,endTime,epic";
             String resultLine1 = lines[0];
             assertEquals(expectedLine1, resultLine1);
-            String expectedLine2 = "1,EPIC,+_+,NEW,|_|,02.11.1993/11:30,1,02.11.1993/11:31,";
+            String expectedLine2 = "1,EPIC,+_+,NEW,|_|";
             String resultLine2 = lines[1];
             assertEquals(expectedLine2, resultLine2);
         } catch (IOException e) {
-            System.out.println("���������� ��������� ����.");
+            e.printStackTrace();
         }
     }
 

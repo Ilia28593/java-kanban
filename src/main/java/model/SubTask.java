@@ -50,7 +50,7 @@ public class SubTask extends Task {
                 ", status=" + status +
                 ", type=" + type +
                 ", startTime=" + start +
-                ", duration=" + durationMinutes.toMinutes() +
+                ", duration=" + durationMinutes +
                 '}';
     }
 }

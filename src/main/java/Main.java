@@ -29,7 +29,7 @@ public class Main {
         SubTask driving2 = new SubTask("Найти компанию по перевозки грузов"
                 , "Заказать машину на определенный день", Status.NEW);
         EpicTask birthday = new EpicTask("Празднование ДР", "Организовать вкусную еду", Status.NEW,
-                LocalDateTime.of(2022,11,15,13,17), Duration.ofMinutes(3));
+                LocalDateTime.of(2022,11,19,13,17), Duration.ofMinutes(3));
         SubTask birthday1 = new SubTask("Посчитать количество гостей", "Сделать рассадку", Status.NEW,
                 LocalDateTime.of(2022,12,15,13,17), Duration.ofMinutes(48));
 
@@ -52,6 +52,9 @@ public class Main {
         System.out.println("Запрос на изменение SubTask c id5, должно также вызваться изменение id4, так как это единственная его сабтаска");
         manager.changeSubtaskStatus(5, DONE);
         manager.printHistoryElement();
+        System.out.println("-----------------------------------------------");
+        System.out.println("Запрос отсортированного списка");
+        manager.getPrioritizedTasks().forEach(System.out::println);
         System.out.println("-----------------------------------------------");
     }
 

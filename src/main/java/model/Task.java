@@ -11,15 +11,13 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 public class Task extends Id {
-    protected static final LocalDateTime DEFAULT_START_TIME =
-            LocalDateTime.of(1993, 11, 2, 11, 30);
     protected String nameTask;
     protected String taskDetail;
     protected Status status;
     protected Type type;
-    protected Duration durationMinutes = Duration.ofMinutes(1L);
-    protected LocalDateTime start = DEFAULT_START_TIME;
-    protected LocalDateTime finish = start.plusMinutes(durationMinutes.toMinutes());
+    protected Duration durationMinutes ;
+    protected LocalDateTime start;
+    protected LocalDateTime finish ;
 
     public Task(String nameTask, String taskDetail, Status status) {
         super();
@@ -72,9 +70,9 @@ public class Task extends Id {
                 ", taskDetail='" + taskDetail + '\'' +
                 ", status=" + status +
                 ", id=" + id +
-                ", type=" + type +
+                ", type=" + type+
                 ", startTime=" + start +
-                ", duration=" + durationMinutes.toMinutes() +
+                ", duration=" + durationMinutes +
                 '}';
     }
 }

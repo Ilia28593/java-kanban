@@ -3,9 +3,9 @@ package service.taskManager;
 import lombok.NoArgsConstructor;
 import model.*;
 import repository.Repository;
+import service.Managers;
 import service.exception.IncorrectIdException;
 import service.exception.TimeIntervalIsUsedException;
-import service.Managers;
 import service.historyManager.HistoryManager;
 
 import java.time.Duration;
@@ -169,53 +169,65 @@ public class InMemoryTaskManager implements TaskManager {
     public void cleanRepository() {
         repository.getEpicTaskMap().keySet().forEach(e -> managerHistory.remove(e));
         repository.getSubTaskMap().keySet().forEach(s -> managerHistory.remove(s));
-        repository.getTaskMap().keySet().forEach(t -> {
-            managerHistory.remove(t);
-        });
-        new Task(0);
+        repository.getTaskMap().keySet().forEach(t -> managerHistory.remove(t));
         repository.cleanRepository();
 
     }
 
     @Override
     public void addTask(Task task) {
-        if (checkFreeTimeInTask(task.getStart(), task.getDurationMinutes().toMinutes(), task.getId())) {
-            if (!repository.getTaskMap().containsKey(task.getId())) {
+        if (task.getStart() != null) {
+            if (checkFreeTimeInTask(task.getStart(), task.getDurationMinutes().toMinutes(), task.getId())) {
                 task.setType(Type.TASK);
+                task.setFinish(task.getStart().plusMinutes(task.getDurationMinutes().toMinutes()));
                 repository.addTaskMap(task);
-                setTaskTime(task.getId(), task.getStart(), task.getDurationMinutes().toMinutes());
-            } else {
-                addTask(new Task(task.getNameTask(), task.getTaskDetail(), task.getStatus()));
+            }else {
+                throw new TimeIntervalIsUsedException("This time is used another Task");
             }
+        } else {
+            task.setType(Type.TASK);
+            repository.addTaskMap(task);
+            repository.addSorted(task);
         }
     }
 
     @Override
     public void addEpicTask(EpicTask epicTask) {
-//        if (checkFreeTimeInTask(epicTask.getStart(), epicTask.getDurationMinutes().toMinutes(), epicTask.getId())) {
-            if (!repository.getEpicTaskMap().containsKey(epicTask.getId())) {
+        if (epicTask.getStart() != null) {
+            if (checkFreeTimeInTask(epicTask.getStart(), epicTask.getDurationMinutes().toMinutes(), epicTask.getId())) {
                 epicTask.setType(Type.EPIC);
                 repository.addEpicTaskMap(epicTask);
-//                repository.addSorted(epicTask);
-//                setEpicTaskTime(epicTask.getId(), epicTask.getStart(), epicTask.getDurationMinutes().toMinutes());
-            } else {
-                addEpicTask(new EpicTask(epicTask.getNameTask(), epicTask.getTaskDetail(), epicTask.getStatus()));
+                planedFinishEpicTask(epicTask.getId());
+            }else {
+                throw new TimeIntervalIsUsedException("This time is used another Task");
             }
-  //      }
+        } else {
+            epicTask.setType(Type.EPIC);
+            repository.addEpicTaskMap(epicTask);
+        }
+        repository.addSorted(epicTask);
     }
 
     @Override
     public void addSubTask(int id, SubTask subtask) {
-        if (checkFreeTimeInTask(subtask.getStart(), subtask.getDurationMinutes().toMinutes(), subtask.getId())) {
-            if (!repository.getSubTaskMap().containsKey(subtask.getId())) {
+        if (subtask.getStart() != null) {
+            if (checkFreeTimeInTask(subtask.getStart(), subtask.getDurationMinutes().toMinutes(), subtask.getId())) {
                 checkStatusInFamilyEpic(id, subtask);
                 repository.getEpicTaskMap().get(id).addSubtask(subtask);
                 subtask.setType(Type.SUBTASK);
+                subtask.setFinish(subtask.getStart().plusMinutes(subtask.getDurationMinutes().toMinutes()));
                 repository.addSubtaskMap(subtask);
-                setSubTaskTime(subtask.getId(), subtask.getStart(), subtask.getDurationMinutes().toMinutes());
-            } else {
-                addSubTask(id, new SubTask(subtask.getNameTask(), subtask.getTaskDetail(), subtask.getStatus()));
+                repository.addSorted(subtask);
+                planedFinishEpicTask(id);
+            }else {
+                throw new TimeIntervalIsUsedException("This time is used another Task");
             }
+        } else {
+            checkStatusInFamilyEpic(id, subtask);
+            repository.getEpicTaskMap().get(id).addSubtask(subtask);
+            subtask.setType(Type.SUBTASK);
+            repository.addSubtaskMap(subtask);
+            repository.addSorted(subtask);
         }
     }
 
@@ -249,6 +261,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void setEpicTaskTime(int id, LocalDateTime localDateTime, Long minutes) {
         if (checkFreeTimeInTask(localDateTime, minutes, id)) {
             getEpicTaskById(id).setStart(localDateTime);
+            getEpicTaskById(id).setDurationMinutes(Duration.ofMinutes(minutes));
             planedFinishEpicTask(id);
             repository.addSorted(getEpicTaskById(id));
         }
@@ -278,30 +291,37 @@ public class InMemoryTaskManager implements TaskManager {
 
     private void planedFinishEpicTask(int id) {
         EpicTask epicTask = repository.getEpicTaskMap().get(id);
-        LocalDateTime finish = epicTask.getStart().plusMinutes(epicTask.getDurationMinutes().toMinutes());
-        epicTask.getSubtaskIds().forEach(s -> finish.plusMinutes(repository.getSubTaskMap()
-                .get(s).getDurationMinutes().toMinutes()));
-        epicTask.setFinish(finish);
+
+        if(epicTask.getStart()!=null){
+            LocalDateTime finish = epicTask.getStart().plusMinutes(epicTask.getDurationMinutes().toMinutes());
+            epicTask.getSubtaskIds().forEach(s -> {
+                if (repository.getSubTaskMap().get(s).getDurationMinutes() != null) {
+                    finish.plusMinutes(repository.getSubTaskMap()
+                            .get(s).getDurationMinutes().toMinutes());
+                }
+            });
+            epicTask.setFinish(finish);
+        }
+
+
     }
 
     public boolean checkFreeTimeInTask(LocalDateTime localDateTime, Long duration, int taskId) {
         LocalDateTime start = localDateTime;
         LocalDateTime finish = start.plusMinutes(duration);
         boolean flag = true;
-        if (!start.equals(LocalDateTime.of(1993, 11, 2, 11, 30))) {
-            while (start.isBefore(finish)) {
-                LocalDateTime finalCorrectStart = transformToCorrectTime(start);
-                if (repository.getCheckFreeTime().keySet().parallelStream().anyMatch(s -> s.equals(finalCorrectStart))) {
-                    if (repository.getCheckFreeTime().get(transformToCorrectTime(start)) == taskId) {
-                        start = start.plusMinutes(15L);
-                    } else {
-                        flag = false;
-                        break;
-                    }
-                } else {
-                    repository.getCheckFreeTime().put(transformToCorrectTime(start), taskId);
+        while (start.isBefore(finish)) {
+            LocalDateTime finalCorrectStart = transformToCorrectTime(start);
+            if (repository.getCheckFreeTime().keySet().parallelStream().anyMatch(s -> s.equals(finalCorrectStart))) {
+                if (repository.getCheckFreeTime().get(transformToCorrectTime(start)) == taskId) {
                     start = start.plusMinutes(15L);
+                } else {
+                    flag = false;
+                    break;
                 }
+            } else {
+                repository.getCheckFreeTime().put(transformToCorrectTime(start), taskId);
+                start = start.plusMinutes(15L);
             }
         }
         return flag;
@@ -333,6 +353,9 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     public List<Task> getPrioritizedTasks() {
-        return new ArrayList<>(repository.getSortedTaskTree());
+        List<Task> tasks = new ArrayList<>();
+        tasks.addAll(repository.getSortedTaskTree());
+        tasks.addAll(repository.getWaiteTimeTaskTree());
+        return tasks;
     }
 }

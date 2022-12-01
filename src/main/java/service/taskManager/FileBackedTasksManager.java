@@ -32,7 +32,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
 
     private void save() throws ManagerException {
         try (FileWriter fileWriter = new FileWriter(fileName, StandardCharsets.UTF_8, false)) {
-            if(repository.listElement().size()!=0) {
+            if (repository.listElement().size() != 0) {
                 fileWriter.write("id,type,name,status,description,startTime,duration,endTime,epic\n");
                 writeAllElementOfList(fileWriter, repository.listElement());
             }
@@ -60,20 +60,31 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
 
     private String taskToString(Task task) {
         if (task.getType().equals(Type.SUBTASK)) {
-            return transformSubTaskString(task);
+            return task.getStart() != null ? transformSubTaskString(task) : transformDefoltSubTaskString(task);
         } else {
-            return transformTaskAndEpicTaskToString(task);
+            return task.getStart() != null ? transformTaskAndEpicTaskToString(task) : transformDefoltTaskAndEpicTaskToString(task);
         }
     }
 
     private String transformSubTaskString(Task task) {
-        return String.format("%d,%s,%s,%s,%s,%s,%d,%s,%d%n", task.getId(), task.getType(), task.getNameTask(),
-                task.getStatus(), task.getTaskDetail(), dateTimeToString(task.getStart()),
-                task.getDurationMinutes().toMinutes(), dateTimeToString(task.getFinish()), ((SubTask) task).getEpicId());
+        return String.format("%d,%s,%s,%s,%s,%d,%s,%d,%s%n", task.getId(), task.getType(), task.getNameTask(),
+                task.getStatus(), task.getTaskDetail(), ((SubTask) task).getEpicId(), dateTimeToString(task.getStart()),
+                task.getDurationMinutes().toMinutes(), dateTimeToString(task.getFinish()));
     }
 
+    private String transformDefoltSubTaskString(Task task) {
+        return String.format("%d,%s,%s,%s,%s,%d%n", task.getId(), task.getType(), task.getNameTask(),
+                task.getStatus(), task.getTaskDetail(), ((SubTask) task).getEpicId());
+    }
+
+    private String transformDefoltTaskAndEpicTaskToString(Task task) {
+        return String.format("%d,%s,%s,%s,%s%n", task.getId(), task.getType(), task.getNameTask(),
+                task.getStatus(), task.getTaskDetail());
+    }
+
+
     private String transformTaskAndEpicTaskToString(Task task) {
-        return String.format("%d,%s,%s,%s,%s,%s,%d,%s,%n", task.getId(), task.getType(), task.getNameTask(),
+        return String.format("%d,%s,%s,%s,%s,%s,%d,%s%n", task.getId(), task.getType(), task.getNameTask(),
                 task.getStatus(), task.getTaskDetail(), dateTimeToString(task.getStart()),
                 task.getDurationMinutes().toMinutes(), dateTimeToString(task.getFinish()));
     }
@@ -153,9 +164,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
             case SUBTASK:
                 SubTask subTask = new SubTask(values[2], values[4], Status.valueOf(values[3]), Integer.parseInt(values[0]));
                 subTask.setType(Type.SUBTASK);
-                bufferKanban.repository.getEpicTaskMap().get(Integer.parseInt(values[8])).addSubtask(subTask);
-                subTask.setStart(stringDateTime(values[5]));
-                subTask.setDurationMinutes(Duration.ofMinutes(Long.parseLong(values[6])));
+                bufferKanban.repository.getEpicTaskMap().get(Integer.parseInt(values[5])).addSubtask(subTask);
+                if(values.length>6) {
+                    subTask.setStart(stringDateTime(values[6]));
+                    subTask.setDurationMinutes(Duration.ofMinutes(Long.parseLong(values[7])));
+                }
                 bufferKanban.repository.addSubtaskMap(subTask);
                 break;
             case EPIC:
