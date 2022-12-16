@@ -1,4 +1,4 @@
-package service;
+package service.taskManager;
 
 import model.EpicTask;
 import model.Status;
@@ -7,7 +7,7 @@ import model.Task;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import service.taskManager.TaskManager;
+import service.Managers;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

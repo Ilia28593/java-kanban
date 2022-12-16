@@ -4,6 +4,7 @@ import model.EpicTask;
 import model.Status;
 import model.SubTask;
 import model.Task;
+import service.historyManager.HistoryManager;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -55,5 +56,9 @@ public interface TaskManager {
     List<EpicTask> getListEpicTask();
 
     List<SubTask> getListSubTask();
+
+    List<SubTask> getSubListOfEpic(int task);
+
+    HistoryManager getManagerHistory();
 }
 

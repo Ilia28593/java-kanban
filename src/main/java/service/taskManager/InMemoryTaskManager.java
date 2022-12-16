@@ -14,12 +14,18 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor
 public class InMemoryTaskManager implements TaskManager {
 
     protected Repository repository = new Repository();
     protected HistoryManager managerHistory = Managers.getHistory();
+
+    @Override
+    public HistoryManager getManagerHistory(){
+        return managerHistory;
+    }
 
     @Override
     public Task getTaskById(int id) {
@@ -51,7 +57,6 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-
     @Override
     public Task updateTask(Task task, Task newTask) {
         updateAndCheckParts(task, newTask);
@@ -78,8 +83,8 @@ public class InMemoryTaskManager implements TaskManager {
         task.setNameTask(newTask.getNameTask() != null ? newTask.getNameTask() : task.getNameTask());
         task.setTaskDetail(newTask.getTaskDetail() != null ? newTask.getTaskDetail() : task.getTaskDetail());
         task.setStatus(newTask.getStatus() != null ? newTask.getStatus() : task.getStatus());
-        task.setStart(newTask.getStart());
-        task.setDurationMinutes(newTask.getDurationMinutes());
+        task.setStart(newTask.getStart() != null ? newTask.getStart() : task.getStart());
+        task.setDurationMinutes(newTask.getDurationMinutes() != null ? newTask.getDurationMinutes() : task.getDurationMinutes());
     }
 
     @Override
@@ -178,33 +183,27 @@ public class InMemoryTaskManager implements TaskManager {
     public void addTask(Task task) {
         if (task.getStart() != null) {
             if (checkFreeTimeInTask(task.getStart(), task.getDurationMinutes().toMinutes(), task.getId())) {
-                task.setType(Type.TASK);
                 task.setFinish(task.getStart().plusMinutes(task.getDurationMinutes().toMinutes()));
-                repository.addTaskMap(task);
-            }else {
+            } else {
                 throw new TimeIntervalIsUsedException("This time is used another Task");
             }
-        } else {
-            task.setType(Type.TASK);
-            repository.addTaskMap(task);
-            repository.addSorted(task);
         }
+        task.setType(Type.TASK);
+        repository.addTaskMap(task);
+        repository.addSorted(task);
     }
 
     @Override
     public void addEpicTask(EpicTask epicTask) {
         if (epicTask.getStart() != null) {
             if (checkFreeTimeInTask(epicTask.getStart(), epicTask.getDurationMinutes().toMinutes(), epicTask.getId())) {
-                epicTask.setType(Type.EPIC);
-                repository.addEpicTaskMap(epicTask);
                 planedFinishEpicTask(epicTask.getId());
-            }else {
+            } else {
                 throw new TimeIntervalIsUsedException("This time is used another Task");
             }
-        } else {
-            epicTask.setType(Type.EPIC);
-            repository.addEpicTaskMap(epicTask);
         }
+        epicTask.setType(Type.EPIC);
+        repository.addEpicTaskMap(epicTask);
         repository.addSorted(epicTask);
     }
 
@@ -212,23 +211,17 @@ public class InMemoryTaskManager implements TaskManager {
     public void addSubTask(int id, SubTask subtask) {
         if (subtask.getStart() != null) {
             if (checkFreeTimeInTask(subtask.getStart(), subtask.getDurationMinutes().toMinutes(), subtask.getId())) {
-                checkStatusInFamilyEpic(id, subtask);
-                repository.getEpicTaskMap().get(id).addSubtask(subtask);
-                subtask.setType(Type.SUBTASK);
                 subtask.setFinish(subtask.getStart().plusMinutes(subtask.getDurationMinutes().toMinutes()));
-                repository.addSubtaskMap(subtask);
-                repository.addSorted(subtask);
                 planedFinishEpicTask(id);
-            }else {
+            } else {
                 throw new TimeIntervalIsUsedException("This time is used another Task");
             }
-        } else {
-            checkStatusInFamilyEpic(id, subtask);
-            repository.getEpicTaskMap().get(id).addSubtask(subtask);
-            subtask.setType(Type.SUBTASK);
-            repository.addSubtaskMap(subtask);
-            repository.addSorted(subtask);
         }
+        checkStatusInFamilyEpic(id, subtask);
+        repository.getEpicTaskMap().get(id).addSubtask(subtask);
+        subtask.setType(Type.SUBTASK);
+        repository.addSubtaskMap(subtask);
+        repository.addSorted(subtask);
     }
 
     private void checkStatusInFamilyEpic(int epicTaskId, SubTask subtask) {
@@ -291,8 +284,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     private void planedFinishEpicTask(int id) {
         EpicTask epicTask = repository.getEpicTaskMap().get(id);
-
-        if(epicTask.getStart()!=null){
+        if (epicTask.getStart() != null) {
             LocalDateTime finish = epicTask.getStart().plusMinutes(epicTask.getDurationMinutes().toMinutes());
             epicTask.getSubtaskIds().forEach(s -> {
                 if (repository.getSubTaskMap().get(s).getDurationMinutes() != null) {
@@ -302,8 +294,6 @@ public class InMemoryTaskManager implements TaskManager {
             });
             epicTask.setFinish(finish);
         }
-
-
     }
 
     public boolean checkFreeTimeInTask(LocalDateTime localDateTime, Long duration, int taskId) {
@@ -357,5 +347,12 @@ public class InMemoryTaskManager implements TaskManager {
         tasks.addAll(repository.getSortedTaskTree());
         tasks.addAll(repository.getWaiteTimeTaskTree());
         return tasks;
+    }
+
+    public List<SubTask> getSubListOfEpic(int task) {
+        EpicTask epicTask = (EpicTask) getEpicTaskById(task);
+        return repository.getSubTaskMap().values().stream()
+                .filter(t -> epicTask.getSubtaskIds().contains(t.getId()))
+                .collect(Collectors.toList());
     }
 }

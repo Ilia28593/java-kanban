@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class FileBackedTasksManagerTest<T extends TaskManager> {
+class FileBackedTasksManagerTest {
     private File d;
     private Path f;
     private TaskManager fileBackedTasksManager;
@@ -32,12 +32,12 @@ class FileBackedTasksManagerTest<T extends TaskManager> {
         d = new File("back-up Test.csv");
         f = Path.of((d).getAbsolutePath());
         fileBackedTasksManager = Managers.getFileBacked(d);
-        task=new Task("Режим салатики ^_^", "Оливье и селедка под шубой", Status.NEW,
+        task = new Task("Режим салатики ^_^", "Оливье и селедка под шубой", Status.NEW,
                 LocalDateTime.of(2022, 12, 31, 18, 0), Duration.ofMinutes(45));
-        epicTask=new EpicTask("-_-", "=)", Status.NEW);
-        subTask= new SubTask("O_o", ":)", Status.NEW,
+        epicTask = new EpicTask("-_-", "=)", Status.NEW);
+        subTask = new SubTask("O_o", ":)", Status.NEW,
                 LocalDateTime.of(2022, 12, 13, 18, 0), Duration.ofMinutes(30), 2);
-        subTask1= new SubTask("+_+", "|_|", Status.NEW,
+        subTask1 = new SubTask("+_+", "|_|", Status.NEW,
                 LocalDateTime.of(2022, 11, 24, 14, 0), Duration.ofMinutes(37), 2);
 
     }
@@ -49,10 +49,11 @@ class FileBackedTasksManagerTest<T extends TaskManager> {
 
     @Test
     void saveWithTasksAndHistory() {
+        fileBackedTasksManager.cleanRepository();
         fileBackedTasksManager.addTask(task);
         fileBackedTasksManager.addEpicTask(epicTask);
-        fileBackedTasksManager.addSubTask(2,subTask);
-        fileBackedTasksManager.addSubTask(2,subTask1);
+        fileBackedTasksManager.addSubTask(2, subTask);
+        fileBackedTasksManager.addSubTask(2, subTask1);
         fileBackedTasksManager.getTaskById(1);
         fileBackedTasksManager.getEpicTaskById(2);
         fileBackedTasksManager.getSubTaskById(3);
@@ -83,6 +84,7 @@ class FileBackedTasksManagerTest<T extends TaskManager> {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        fileBackedTasksManager.cleanRepository();
     }
 
     @Test
@@ -102,8 +104,8 @@ class FileBackedTasksManagerTest<T extends TaskManager> {
     void saveEmptyHistory() {
         fileBackedTasksManager.addTask(task);
         fileBackedTasksManager.addEpicTask(epicTask);
-        fileBackedTasksManager.addSubTask(2,subTask);
-        fileBackedTasksManager.addSubTask(2,subTask1);
+        fileBackedTasksManager.addSubTask(2, subTask);
+        fileBackedTasksManager.addSubTask(2, subTask1);
         try {
             String fileString = Files.readString(f);
             String[] lines = fileString.split("\r?\n");
@@ -125,6 +127,7 @@ class FileBackedTasksManagerTest<T extends TaskManager> {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        fileBackedTasksManager.cleanRepository();
     }
 
     @Test
@@ -144,17 +147,19 @@ class FileBackedTasksManagerTest<T extends TaskManager> {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        fileBackedTasksManager.cleanRepository();
     }
 
     @Test
     void loadFromFileWithTasks() {
         fileBackedTasksManager.addTask(task);
         fileBackedTasksManager.addEpicTask(epicTask);
-        fileBackedTasksManager.addSubTask(2,subTask);
-        fileBackedTasksManager.addSubTask(2,subTask1);
+        fileBackedTasksManager.addSubTask(2, subTask);
+        fileBackedTasksManager.addSubTask(2, subTask1);
         assertEquals(fileBackedTasksManager.getListTask().size(), 1);
         assertEquals(fileBackedTasksManager.getListSubTask().size(), 2);
         assertEquals(fileBackedTasksManager.getListEpicTask().size(), 1);
+        fileBackedTasksManager.cleanRepository();
     }
 
     @Test
