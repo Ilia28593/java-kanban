@@ -1,11 +1,11 @@
 package api;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import model.EpicTask;
+import model.Status;
 import model.SubTask;
 import model.Task;
 import service.Managers;
@@ -20,6 +20,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class HttpTaskServer {
@@ -223,10 +224,22 @@ public class HttpTaskServer {
                     case "POST":
                         InputStream inputStream = httpExchange.getRequestBody();
                         String body = new String(inputStream.readAllBytes(), DEFAULT_CHARSET);
+                        JsonElement jsonElement = JsonParser.parseString(body);
+                        JsonObject jsonObject = jsonElement.getAsJsonObject();
                         switch (taskCategory) {
                             case "task":
                                 //endpoint: POST /tasks/task/ Body: {task ...} - without id: createTask
-                                Task task = gson.fromJson(body, Task.class);
+                                Task task;
+                                if(body.contains("startTime")) {
+                                    task = new Task(jsonObject.get("name").getAsString(), jsonObject.get("description").getAsString(),
+                                            Status.valueOf(jsonObject.get("status").getAsString()),
+                                            LocalDateTime.parse(jsonObject.get("startTime").getAsString(), DateTimeFormatter.ofPattern("dd--MM--yyyy HH:mm")),
+                                            Duration.ofMinutes(jsonObject.get("duration").getAsInt()));
+                                }else {
+                                    task = new Task(jsonObject.get("name").getAsString(), jsonObject.get("description").getAsString(),
+                                            Status.valueOf(jsonObject.get("status").getAsString()));
+                                }
+                                //Task task = gson.fromJson(body, Task.class);
                                 if (!body.contains("id")) {
                                     kanban.addTask(task);
                                 } else {
@@ -238,9 +251,21 @@ public class HttpTaskServer {
                                 break;
                             case "subtask":
                                 //endpoint: POST /tasks/subtask/ Body: {task ...} - without id: createSubTask
-                                SubTask subTask = gson.fromJson(body, SubTask.class);
+                                SubTask subTask;
+                                if(body.contains("startTime")) {
+                                    subTask = new SubTask(jsonObject.get("name").getAsString(),
+                                            jsonObject.get("description").getAsString(),
+                                            Status.valueOf(jsonObject.get("status").getAsString()),
+                                            LocalDateTime.parse(jsonObject.get("startTime").getAsString(),
+                                                    DateTimeFormatter.ofPattern("dd--MM--yyyy HH:mm")),
+                                            Duration.ofMinutes(jsonObject.get("duration").getAsInt()));
+                                }else {
+                                    subTask = new SubTask(jsonObject.get("name").getAsString(),
+                                            jsonObject.get("description").getAsString(),
+                                            Status.valueOf(jsonObject.get("status").getAsString()));
+                                }
                                 if (!body.contains("id")) {
-                                    kanban.addSubTask(3,subTask);
+                                    kanban.addSubTask(jsonObject.get("epicTaskId").getAsInt(),subTask);
                                 } else {
                                     //endpoint: POST /tasks/subtask/ Body: {task ...} - with id: renewSubTask
                                     kanban.updateTask(kanban.getSubTaskById(subTask.getId()),subTask);
@@ -250,7 +275,16 @@ public class HttpTaskServer {
                                 break;
                             case "epic":
                                 //endpoint: POST /tasks/subtask/ Body: {task ...} - without id: createEpicTask
-                                EpicTask epicTask = gson.fromJson(body, EpicTask.class);
+                                EpicTask epicTask;
+                                if(body.contains("startTime")) {
+                                   epicTask = new EpicTask(jsonObject.get("name").getAsString(), jsonObject.get("description").getAsString(),
+                                            Status.valueOf(jsonObject.get("status").getAsString()),
+                                            LocalDateTime.parse(jsonObject.get("startTime").getAsString(), DateTimeFormatter.ofPattern("dd--MM--yyyy HH:mm")),
+                                            Duration.ofMinutes(jsonObject.get("duration").getAsInt()));
+                                }else {
+                                    epicTask = new EpicTask(jsonObject.get("name").getAsString(), jsonObject.get("description").getAsString(),
+                                            Status.valueOf(jsonObject.get("status").getAsString()));
+                                }
                                 kanban.addEpicTask(epicTask);
                                 httpExchange.sendResponseHeaders(201, 0);
                                 httpExchange.close();

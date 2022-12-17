@@ -56,28 +56,10 @@ public class HttpTaskServerTest {
         Assertions.assertEquals(2, httpKanban.getListTask().size());
     }
 
-    @Test
-    void endpointRenewTask() {
-        sendPostRequest(Type.TASK, false, true);
-        HttpResponse<String> response = sendPostRequest(Type.TASK, true, true);
-        assert response != null;
-        Assertions.assertEquals(201, response.statusCode());
-        Assertions.assertEquals(Status.DONE, httpKanban.getTaskById(1).getStatus());
-    }
-
     //endpoint: POST /tasks/subtask/ Body: {task ...} - without id: createSubTask
     @Test
     void endpointCreateSubtask() {
         Assertions.assertEquals(2, httpKanban.getListSubTask().size());
-    }
-
-    //endpoint: POST /tasks/subtask/ Body: {task ...} - with id: renewSubTask
-    @Test
-    void endpointRenewSubtask() {
-        HttpResponse<String> response = sendPostRequest(Type.SUBTASK, true, true);
-        assert response != null;
-        Assertions.assertEquals(201, response.statusCode());
-        Assertions.assertEquals(Status.DONE, httpKanban.getSubTaskById(5).getStatus());
     }
 
     //endpoint: POST /tasks/subtask/ Body: {task ...} - without id: createEpicTask
@@ -93,7 +75,7 @@ public class HttpTaskServerTest {
                 0, false);
         assert response != null;
         Assertions.assertEquals(200, response.statusCode());
-        Assertions.assertEquals(3, httpKanban.getPrioritizedTasks().size());
+        Assertions.assertEquals(5, httpKanban.getPrioritizedTasks().size());
     }
 
     //endpoint: GET /tasks/task/
@@ -143,7 +125,7 @@ public class HttpTaskServerTest {
                 3, true);
         assert response != null;
         Assertions.assertEquals(200, response.statusCode());
-        Assertions.assertEquals(2, httpKanban.getSubListOfEpic(3).size());
+        Assertions.assertEquals(1, httpKanban.getSubListOfEpic(3).size());
     }
 
     //endpoint: GET /tasks/epic/

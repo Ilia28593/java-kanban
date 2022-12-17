@@ -69,10 +69,10 @@ public class Task extends Id {
                 "nameTask='" + nameTask + '\'' +
                 ", taskDetail='" + taskDetail + '\'' +
                 ", status=" + status +
-                ", id=" + id +
                 ", type=" + type+
                 ", startTime=" + start +
                 ", duration=" + durationMinutes +
+                ", id=" + id +
                 '}';
     }
 }
