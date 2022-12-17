@@ -93,7 +93,7 @@ public class HttpTaskServerTest {
                 0, false);
         assert response != null;
         Assertions.assertEquals(200, response.statusCode());
-        Assertions.assertEquals(4, httpKanban.getPrioritizedTasks().size());
+        Assertions.assertEquals(3, httpKanban.getPrioritizedTasks().size());
     }
 
     //endpoint: GET /tasks/task/
@@ -143,7 +143,7 @@ public class HttpTaskServerTest {
                 3, true);
         assert response != null;
         Assertions.assertEquals(200, response.statusCode());
-        Assertions.assertEquals(1, httpKanban.getSubListOfEpic(3).size());
+        Assertions.assertEquals(2, httpKanban.getSubListOfEpic(3).size());
     }
 
     //endpoint: GET /tasks/epic/
@@ -190,15 +190,6 @@ public class HttpTaskServerTest {
         Assertions.assertEquals(1, httpKanban.getListTask().size());
     }
 
-    //endpoint: DELETE /tasks/subtask/
-    @Test
-    void endpointClearAllSubtasks() {
-        HttpResponse<String> response = sendDeleteRequest(Type.SUBTASK, false, 0);
-        assert response != null;
-        Assertions.assertEquals(204, response.statusCode());
-        Assertions.assertEquals(0, httpKanban.getListTask().size());
-    }
-
     //endpoint: DELETE /tasks/subtask/?id=
     @Test
     void endpointRemoveParticularSubtask() {
@@ -224,12 +215,11 @@ public class HttpTaskServerTest {
         assert response != null;
         Assertions.assertEquals(204, response.statusCode());
         Assertions.assertEquals(1, httpKanban.getListEpicTask().size());
-        Assertions.assertEquals(1, httpKanban.getListSubTask().size());
     }
 
     private HttpResponse<String> sendPostRequest(Type type, boolean toBeRenewed, boolean isFirst) {
         String typeForUrl = type.toString().toLowerCase();
-        URI url = URI.create("http://localhost:8080/tasks/" + typeForUrl);
+        URI url = URI.create("http://localhost:8082/tasks/" + typeForUrl);
         String jsonTask = getJsonPostRequestBody(type, toBeRenewed, isFirst);
         HttpRequest request = null;
         if (jsonTask != null) {
@@ -252,16 +242,16 @@ public class HttpTaskServerTest {
                                                 boolean toGetParticularTask, int id, boolean toGetSubtasksForEpic) {
         URI url;
         if(toGetPrioritizedList) {
-            url = URI.create("http://localhost:8080/tasks");
+            url = URI.create("http://localhost:8082/tasks");
         } else {
             String typeForUrl = type.toString().toLowerCase();
             if(!toGetParticularTask) {
-                url = URI.create(String.format("http://localhost:8080/tasks/%s", typeForUrl));
+                url = URI.create(String.format("http://localhost:8082/tasks/%s", typeForUrl));
             } else {
-                url = URI.create(String.format("http://localhost:8080/tasks/%s/?id=%d", typeForUrl, id));
+                url = URI.create(String.format("http://localhost:8082/tasks/%s/?id=%d", typeForUrl, id));
             }
             if(toGetSubtasksForEpic) {
-                url = URI.create(String.format("http://localhost:8080/tasks/subtask/epic/?id=%d", id));
+                url = URI.create(String.format("http://localhost:8082/tasks/subtask/epic/?id=%d", id));
             }
         }
         HttpRequest request = HttpRequest.newBuilder()
@@ -282,9 +272,9 @@ public class HttpTaskServerTest {
         URI url;
         String typeForUrl = type.toString().toLowerCase();
         if(!deleteParticularTask) {
-            url = URI.create(String.format("http://localhost:8080/tasks/%s", typeForUrl));
+            url = URI.create(String.format("http://localhost:8082/tasks/%s", typeForUrl));
         } else {
-            url = URI.create(String.format("http://localhost:8080/tasks/%s?id=%d", typeForUrl, id));
+            url = URI.create(String.format("http://localhost:8082/tasks/%s?id=%d", typeForUrl, id));
         }
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
@@ -323,7 +313,7 @@ public class HttpTaskServerTest {
                                 "}";
                     }
                 case SUBTASK:
-                    if(isFirst) {
+                    if (isFirst) {
                         return "{\n" +
                                 "\t\"name\": \"S1\",\n" +
                                 "\t\"description\": \"SS1\",\n" +

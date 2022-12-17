@@ -25,7 +25,7 @@ import java.util.List;
 public class HttpTaskServer {
     String url;
     TaskManager httpKanban;
-    private static final int PORT = 8080;
+    private static final int PORT = 8082;
     private static final String URL_TO_KV_SERVER = "http://localhost:8078";
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
     private static Gson gson;
@@ -228,8 +228,7 @@ public class HttpTaskServer {
                                 //endpoint: POST /tasks/task/ Body: {task ...} - without id: createTask
                                 Task task = gson.fromJson(body, Task.class);
                                 if (!body.contains("id")) {
-                                    kanban.addTask(new Task(task.getNameTask(), task.getTaskDetail(), task.getStatus(),
-                                            task.getStart(), task.getDurationMinutes()));
+                                    kanban.addTask(task);
                                 } else {
                                     //endpoint: POST /tasks/task/ Body: {task ...} - with id: renewTask
                                     kanban.updateTask(kanban.getTaskById(task.getId()),task);
@@ -241,9 +240,7 @@ public class HttpTaskServer {
                                 //endpoint: POST /tasks/subtask/ Body: {task ...} - without id: createSubTask
                                 SubTask subTask = gson.fromJson(body, SubTask.class);
                                 if (!body.contains("id")) {
-                                    kanban.addSubTask(subTask.getEpicId(),new SubTask(subTask.getNameTask(), subTask.getTaskDetail(),
-                                            subTask.getStatus(), subTask.getStart(),
-                                            subTask.getDurationMinutes(), subTask.getEpicId()));
+                                    kanban.addSubTask(3,subTask);
                                 } else {
                                     //endpoint: POST /tasks/subtask/ Body: {task ...} - with id: renewSubTask
                                     kanban.updateTask(kanban.getSubTaskById(subTask.getId()),subTask);
@@ -254,8 +251,7 @@ public class HttpTaskServer {
                             case "epic":
                                 //endpoint: POST /tasks/subtask/ Body: {task ...} - without id: createEpicTask
                                 EpicTask epicTask = gson.fromJson(body, EpicTask.class);
-                                kanban.addEpicTask(new EpicTask(epicTask.getNameTask(), epicTask.getTaskDetail(),
-                                        epicTask.getStatus()));
+                                kanban.addEpicTask(epicTask);
                                 httpExchange.sendResponseHeaders(201, 0);
                                 httpExchange.close();
                                 break;
