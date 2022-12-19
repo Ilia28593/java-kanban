@@ -4,6 +4,7 @@ import api.HttpTaskServer;
 import api.KVServer;
 import com.google.gson.Gson;
 import model.Status;
+import model.SubTask;
 import model.Task;
 import model.Type;
 import org.junit.jupiter.api.AfterEach;
@@ -155,7 +156,7 @@ public class HttpTaskServerTest {
     //endpoint: GET /tasks/history
     @Test
     void endpointGetHistory() {
-        Assertions.assertEquals(3, httpKanban.getManagerHistory().getHistoryList().size());
+        Assertions.assertEquals(3, httpKanban.managerHistory.getHistoryList().size());
     }
 
     //endpoint: DELETE /tasks/task/
@@ -341,15 +342,9 @@ public class HttpTaskServerTest {
                             LocalDateTime.of(2022, 12, 31, 18, 0),
                             Duration.ofMinutes(45)));
                 case SUBTASK:
-                    return "{\n" +
-                            "\t\"name\": \"S1\",\n" +
-                            "\t\"description\": \"SS1\",\n" +
-                            "\t\"status\": \"DONE\",\n" +
-                            "\t\"epicTaskId\": 3,\n" +
-                            "\t\"startTime\": \"05--11--2022 18:37\",\n" +
-                            "\t\"duration\": 120,\n" +
-                            "\t\"id\": 5\n" +
-                            "}";
+                    return new Gson().toJson(new SubTask("O_o", ":)", Status.NEW,
+                            LocalDateTime.of(2022, 12, 13, 18, 0),
+                            Duration.ofMinutes(30), 2));
             }
         }
         return null;

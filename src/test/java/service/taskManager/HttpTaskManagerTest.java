@@ -56,37 +56,37 @@ public class HttpTaskManagerTest {
         assertEquals(2, httpTaskManager.getListSubTask().size());
         assertTrue(compareExpectedAndActualNumberOfTasks(1, httpTaskManager.getListEpicTask().size()));
         assertTrue(compareExpectedAndActualNumberOfTasks(3,
-                httpTaskManager.getManagerHistory().getHistoryList().size()));
+                httpTaskManager.ListHistoryElement().size()));
     }
 
-//    @Test
-//    void serverNoTasksCreated() {
-//        httpTaskManager.cleanRepository();
-//        assertTrue(compareExpectedAndActualNumberOfTasks(0, httpTaskManager.getListTask().size()));
-//        assertTrue(compareExpectedAndActualNumberOfTasks(0, httpTaskManager.getListSubTask().size()));
-//        assertTrue(compareExpectedAndActualNumberOfTasks(0, httpTaskManager.getListEpicTask().size()));
-//        assertTrue(compareExpectedAndActualNumberOfTasks(0,
-//                httpTaskManager.getManagerHistory().getHistoryList().size()));
-//    }
-//
-//    @Test
-//    void serverEmptyHistory() {
-//        assertTrue(compareExpectedAndActualNumberOfTasks(1, httpTaskManager.getListTask().size()));
-//        assertEquals(2, httpTaskManager.getListSubTask().size());
-//        assertTrue(compareExpectedAndActualNumberOfTasks(2, httpTaskManager.getListSubTask().size()));
-//        assertTrue(compareExpectedAndActualNumberOfTasks(1, httpTaskManager.getListEpicTask().size()));
-//        assertEquals(0,
-//                httpTaskManager.getManagerHistory().getHistoryList().size());
-//    }
-//
-//    @Test
-//    void serverEpicTaskWithoutSubtasks() {
-//        httpTaskManager.cleanRepository();
-//        httpTaskManager.addTask(new Task("x_x", "*_*", Status.NEW));
-//        assertTrue(compareExpectedAndActualNumberOfTasks(1,  httpTaskManager.getListTask().size()));
-//        assertTrue(compareExpectedAndActualNumberOfTasks(0, httpTaskManager.getListSubTask().size()));
-//        assertTrue(compareExpectedAndActualNumberOfTasks(0, httpTaskManager.getListEpicTask().size()));
-//        assertTrue(compareExpectedAndActualNumberOfTasks(0,
-//                httpTaskManager.getManagerHistory().getHistoryList().size()));
-//    }
+    @Test
+    void serverNoTasksCreated() {
+        httpTaskManager.cleanRepository();
+        assertTrue(compareExpectedAndActualNumberOfTasks(0, httpTaskManager.getListTask().size()));
+        assertTrue(compareExpectedAndActualNumberOfTasks(0, httpTaskManager.getListSubTask().size()));
+        assertTrue(compareExpectedAndActualNumberOfTasks(0, httpTaskManager.getListEpicTask().size()));
+        assertTrue(compareExpectedAndActualNumberOfTasks(0,
+                httpTaskManager.ListHistoryElement().size()));
+    }
+
+    @Test
+    void serverEmptyHistory() {
+        assertTrue(compareExpectedAndActualNumberOfTasks(1, httpTaskManager.getListTask().size()));
+        assertEquals(2, httpTaskManager.getListSubTask().size());
+        assertTrue(compareExpectedAndActualNumberOfTasks(2, httpTaskManager.getListSubTask().size()));
+        assertTrue(compareExpectedAndActualNumberOfTasks(1, httpTaskManager.getListEpicTask().size()));
+        assertEquals(0,
+                httpTaskManager.ListHistoryElement().size());
+    }
+
+    @Test
+    void serverEpicTaskWithoutSubtasks() {
+        httpTaskManager.cleanRepository();
+        httpTaskManager.addTask(new Task("x_x", "*_*", Status.NEW));
+        assertTrue(compareExpectedAndActualNumberOfTasks(1,  httpTaskManager.getListTask().size()));
+        assertTrue(compareExpectedAndActualNumberOfTasks(0, httpTaskManager.getListSubTask().size()));
+        assertTrue(compareExpectedAndActualNumberOfTasks(0, httpTaskManager.getListEpicTask().size()));
+        assertTrue(compareExpectedAndActualNumberOfTasks(0,
+                httpTaskManager.ListHistoryElement().size()));
+    }
 }

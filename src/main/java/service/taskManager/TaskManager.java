@@ -4,7 +4,6 @@ import model.EpicTask;
 import model.Status;
 import model.SubTask;
 import model.Task;
-import service.historyManager.HistoryManager;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,7 +18,7 @@ public interface TaskManager {
 
     void setSubTaskTime(int id, LocalDateTime localDateTime, Long minutes);
 
-    void printHistoryElement();
+    List ListHistoryElement();
 
     void printAllElement();
 
@@ -58,7 +57,5 @@ public interface TaskManager {
     List<SubTask> getListSubTask();
 
     List<SubTask> getSubListOfEpic(int task);
-
-    HistoryManager getManagerHistory();
 }
 

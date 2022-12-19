@@ -22,10 +22,6 @@ public class InMemoryTaskManager implements TaskManager {
     protected Repository repository = new Repository();
     protected HistoryManager managerHistory = Managers.getHistory();
 
-    public HistoryManager getManagerHistory(){
-        return managerHistory;
-    }
-
     @Override
     public Task getTaskById(int id) {
         if (repository.getTaskMap().containsKey(id)) {
@@ -338,8 +334,8 @@ public class InMemoryTaskManager implements TaskManager {
         repository.listElement().forEach(System.out::println);
     }
 
-    public void printHistoryElement() {
-        managerHistory.getHistoryList().forEach(System.out::println);
+    public List ListHistoryElement() {
+        return managerHistory.getHistoryList();
     }
 
     public List<Task> getPrioritizedTasks() {

@@ -5,12 +5,14 @@ import model.Status;
 import model.SubTask;
 import model.Task;
 import service.taskManager.HttpTaskManager;
+import service.taskManager.TaskManager;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
 public class Main {
+
     public static void main(String[] args) throws IOException {
 
         {
@@ -44,7 +46,7 @@ public class Main {
             assert server != null;
             server.start();
 
-            HttpTaskManager kanban = new HttpTaskManager("http://localhost:8078");
+            TaskManager kanban = new HttpTaskManager("http://localhost:8078");
 
             EpicTask driving = new EpicTask("Переезд", "Продумать план переезда", Status.NEW,
                     LocalDateTime.of(2022, 11, 15, 13, 17), Duration.ofMinutes(22));
@@ -74,7 +76,7 @@ public class Main {
             System.out.println("List of subtasks:");
             kanban.getListSubTask().forEach(System.out::println);
             System.out.println("History:");
-            kanban.getManagerHistory().getHistoryList().forEach(System.out::println);
+            kanban.ListHistoryElement().forEach(System.out::println);
 
             server.stop();
         }
