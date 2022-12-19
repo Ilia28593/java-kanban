@@ -1,70 +1,83 @@
+import api.HttpTaskServer;
+import api.KVServer;
 import model.EpicTask;
 import model.Status;
 import model.SubTask;
-import service.Managers;
-import service.taskManager.FileBackedTasksManager;
-import service.taskManager.TaskManager;
+import model.Task;
+import service.taskManager.HttpTaskManager;
 
-import java.io.File;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-import static model.Status.DONE;
-
 public class Main {
+    public static void main(String[] args) throws IOException {
 
-    public static void main(String[] args) {
-        write();
-        read();
-    }
+        {
+            //Requests to HttpTaskManager via HttpTaskServer using Insomnia
+            KVServer repoServer = null;
+            try {
+                repoServer = new KVServer();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            repoServer.start();
+            HttpTaskServer taskServer = null;
+            try {
+                taskServer = new HttpTaskServer();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            assert taskServer != null;
+            taskServer.start();
+            //NOTE: To test in Insomnia - please comment the following stop-lines.
+            repoServer.stop();
+            taskServer.stop();
+        }
 
-    public static void write() {
-        File f = new File("back-up file.csv");
-        TaskManager manager = Managers.getFileBacked(f);
+        {
+            KVServer server = null;
+            try {
+                server = new KVServer();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            assert server != null;
+            server.start();
+            //Serialization using the server
+            HttpTaskManager kanban = new HttpTaskManager("http://localhost:8078");
 
-        EpicTask driving = new EpicTask("Переезд", "Продумать план переезда", Status.NEW,
-                LocalDateTime.of(2022,11,15,13,17), Duration.ofMinutes(22));
-        SubTask driving1 = new SubTask("Собрать коробки", "Разложить вещи по коробкам", Status.NEW,
-                LocalDateTime.of(2022,11,15,18,17), Duration.ofMinutes(59));
-        SubTask driving2 = new SubTask("Найти компанию по перевозки грузов"
-                , "Заказать машину на определенный день", Status.NEW);
-        EpicTask birthday = new EpicTask("Празднование ДР", "Организовать вкусную еду", Status.NEW,
-                LocalDateTime.of(2022,11,19,13,17), Duration.ofMinutes(3));
-        SubTask birthday1 = new SubTask("Посчитать количество гостей", "Сделать рассадку", Status.NEW,
-                LocalDateTime.of(2022,12,15,13,17), Duration.ofMinutes(48));
+            EpicTask driving = new EpicTask("Переезд", "Продумать план переезда", Status.NEW,
+                    LocalDateTime.of(2022, 11, 15, 13, 17), Duration.ofMinutes(22));
+            SubTask driving1 = new SubTask("Собрать коробки", "Разложить вещи по коробкам", Status.NEW,
+                    LocalDateTime.of(2022, 11, 15, 18, 17), Duration.ofMinutes(59));
+            SubTask driving2 = new SubTask("Найти компанию по перевозки грузов"
+                    , "Заказать машину на определенный день", Status.NEW);
+            EpicTask birthday = new EpicTask("Празднование ДР", "Организовать вкусную еду", Status.NEW,
+                    LocalDateTime.of(2022, 11, 19, 13, 17), Duration.ofMinutes(3));
+            Task birthday1 = new Task("Посчитать количество гостей", "Сделать рассадку", Status.NEW,
+                    LocalDateTime.of(2022, 12, 15, 13, 17), Duration.ofMinutes(48));
 
-        manager.addEpicTask(driving);
-        manager.addSubTask(driving.getId(), driving1);
-        manager.addSubTask(driving.getId(), driving2);
-        manager.addEpicTask(birthday);
-        manager.addSubTask(birthday.getId(), birthday1);
+            kanban.addEpicTask(driving);
+            kanban.addSubTask(driving.getId(), driving1);
+            kanban.addSubTask(driving.getId(), driving2);
+            kanban.addEpicTask(birthday);
+            kanban.addTask(birthday1);
 
-        System.out.println("Были добавлены следующие задачи");
-        manager.printAllElement();
-        System.out.println("-----------------------------------------------");
-        System.out.println("Проверка history");
-        manager.printHistoryElement();
-        System.out.println("-----------------------------------------------");
-        System.out.println("Была запрошена таска с id1, проверка history");
-        manager.getEpicTaskById(1);
-        manager.printHistoryElement();
-        System.out.println("-----------------------------------------------");
-        System.out.println("Запрос на изменение SubTask c id5, должно также вызваться изменение id4, так как это единственная его сабтаска");
-        manager.changeSubtaskStatus(5, DONE);
-        manager.printHistoryElement();
-        System.out.println("-----------------------------------------------");
-        System.out.println("Запрос отсортированного списка");
-        manager.getPrioritizedTasks().forEach(System.out::println);
-        System.out.println("-----------------------------------------------");
-    }
+            kanban.getTaskById(5);
+            kanban.getSubTaskById(3);
+            kanban.getEpicTaskById(1);
+            //Deserialization using the same server
+            System.out.println("List of tasks:");
+            kanban.getListTask().forEach(System.out::println);
+            System.out.println("List of epics:");
+            kanban.getListEpicTask().forEach(System.out::println);
+            System.out.println("List of subtasks:");
+            kanban.getListSubTask().forEach(System.out::println);
+            System.out.println("History:");
+            kanban.getManagerHistory().getHistoryList().forEach(System.out::println);
 
-    public static void read() {
-        File f = new File("back-up file.csv");
-        TaskManager manager = FileBackedTasksManager.loadFromFile(f);
-        System.out.println("Загрузка с файла, были восстановлены следующие задачи");
-        manager.printAllElement();
-        System.out.println("-----------------------------------------------");
-        System.out.println("Загруженная history ");
-        manager.printHistoryElement();
+            server.stop();
+        }
     }
 }

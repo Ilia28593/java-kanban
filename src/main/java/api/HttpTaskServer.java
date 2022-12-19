@@ -16,19 +16,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import static service.Managers.getHistory;
+import static service.taskManager.Constants.*;
+
+
 public class HttpTaskServer {
-    String url;
-    TaskManager httpKanban;
-    private static final int PORT = 8082;
-    private static final String URL_TO_KV_SERVER = "http://localhost:8078";
-    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+    private String url;
+    private TaskManager httpKanban;
     private static Gson gson;
     private final HttpServer server;
 
@@ -40,7 +39,7 @@ public class HttpTaskServer {
         gsonBuilder.registerTypeAdapter(Duration.class, new DurationAdapter());
         gson = gsonBuilder.create();
         server = HttpServer.create();
-        server.bind(new InetSocketAddress(PORT), 0);
+        server.bind(new InetSocketAddress(PORT_HTTP_TASK_SERVER), 0);
         server.createContext("/tasks", new TasksHandler(httpKanban));
     }
 
@@ -52,18 +51,18 @@ public class HttpTaskServer {
         gsonBuilder.registerTypeAdapter(Duration.class, new DurationAdapter());
         gson = gsonBuilder.create();
         server = HttpServer.create();
-        server.bind(new InetSocketAddress(PORT), 0);
+        server.bind(new InetSocketAddress(PORT_HTTP_TASK_SERVER), 0);
         server.createContext("/tasks", new TasksHandler(httpKanban));
     }
 
     public void start() {
         server.start();
-        System.out.println("HTTP-сервер запущен на " + PORT + " порту!");
+        System.out.println("HTTP-сервер запущен на " + PORT_HTTP_TASK_SERVER + " порту!");
     }
 
     public void stop() {
         server.stop(0);
-        System.out.println("HTTP-сервер остановлен на " + PORT + " порту!");
+        System.out.println("HTTP-сервер остановлен на " + PORT_HTTP_TASK_SERVER + " порту!");
     }
 
     static class TasksHandler implements HttpHandler {
@@ -171,7 +170,7 @@ public class HttpTaskServer {
                                 //endpoint: GET /tasks/history
                                 httpExchange.sendResponseHeaders(200, 0);
                                 try (OutputStream os = httpExchange.getResponseBody()) {
-                                    List<Task> history = kanban.getManagerHistory().getHistoryList();
+                                    List<Task> history =getHistory().getHistoryList();
                                     os.write(gson.toJson(history).getBytes());
                                 }
                                 break;
@@ -208,7 +207,7 @@ public class HttpTaskServer {
                             case "epic":
                                 //endpoint: DELETE /tasks/epic/
                                 if (query == null) {
-                                    kanban.getListEpicTask().forEach(e->
+                                    kanban.getListEpicTask().forEach(e ->
                                             kanban.removeByID(e.getId())
                                     );
                                 } else {
@@ -230,12 +229,12 @@ public class HttpTaskServer {
                             case "task":
                                 //endpoint: POST /tasks/task/ Body: {task ...} - without id: createTask
                                 Task task;
-                                if(body.contains("startTime")) {
+                                if (body.contains("startTime")) {
                                     task = new Task(jsonObject.get("name").getAsString(), jsonObject.get("description").getAsString(),
                                             Status.valueOf(jsonObject.get("status").getAsString()),
                                             LocalDateTime.parse(jsonObject.get("startTime").getAsString(), DateTimeFormatter.ofPattern("dd--MM--yyyy HH:mm")),
                                             Duration.ofMinutes(jsonObject.get("duration").getAsInt()));
-                                }else {
+                                } else {
                                     task = new Task(jsonObject.get("name").getAsString(), jsonObject.get("description").getAsString(),
                                             Status.valueOf(jsonObject.get("status").getAsString()));
                                 }
@@ -244,7 +243,7 @@ public class HttpTaskServer {
                                     kanban.addTask(task);
                                 } else {
                                     //endpoint: POST /tasks/task/ Body: {task ...} - with id: renewTask
-                                    kanban.updateTask(kanban.getTaskById(task.getId()),task);
+                                    kanban.updateTask(kanban.getTaskById(task.getId()), task);
                                 }
                                 httpExchange.sendResponseHeaders(201, 0);
                                 httpExchange.close();
@@ -252,23 +251,23 @@ public class HttpTaskServer {
                             case "subtask":
                                 //endpoint: POST /tasks/subtask/ Body: {task ...} - without id: createSubTask
                                 SubTask subTask;
-                                if(body.contains("startTime")) {
+                                if (body.contains("startTime")) {
                                     subTask = new SubTask(jsonObject.get("name").getAsString(),
                                             jsonObject.get("description").getAsString(),
                                             Status.valueOf(jsonObject.get("status").getAsString()),
                                             LocalDateTime.parse(jsonObject.get("startTime").getAsString(),
                                                     DateTimeFormatter.ofPattern("dd--MM--yyyy HH:mm")),
                                             Duration.ofMinutes(jsonObject.get("duration").getAsInt()));
-                                }else {
+                                } else {
                                     subTask = new SubTask(jsonObject.get("name").getAsString(),
                                             jsonObject.get("description").getAsString(),
                                             Status.valueOf(jsonObject.get("status").getAsString()));
                                 }
                                 if (!body.contains("id")) {
-                                    kanban.addSubTask(jsonObject.get("epicTaskId").getAsInt(),subTask);
+                                    kanban.addSubTask(jsonObject.get("epicTaskId").getAsInt(), subTask);
                                 } else {
                                     //endpoint: POST /tasks/subtask/ Body: {task ...} - with id: renewSubTask
-                                    kanban.updateTask(kanban.getSubTaskById(subTask.getId()),subTask);
+                                    kanban.updateTask(kanban.getSubTaskById(subTask.getId()), subTask);
                                 }
                                 httpExchange.sendResponseHeaders(201, 0);
                                 httpExchange.close();
@@ -276,12 +275,12 @@ public class HttpTaskServer {
                             case "epic":
                                 //endpoint: POST /tasks/subtask/ Body: {task ...} - without id: createEpicTask
                                 EpicTask epicTask;
-                                if(body.contains("startTime")) {
-                                   epicTask = new EpicTask(jsonObject.get("name").getAsString(), jsonObject.get("description").getAsString(),
+                                if (body.contains("startTime")) {
+                                    epicTask = new EpicTask(jsonObject.get("name").getAsString(), jsonObject.get("description").getAsString(),
                                             Status.valueOf(jsonObject.get("status").getAsString()),
                                             LocalDateTime.parse(jsonObject.get("startTime").getAsString(), DateTimeFormatter.ofPattern("dd--MM--yyyy HH:mm")),
                                             Duration.ofMinutes(jsonObject.get("duration").getAsInt()));
-                                }else {
+                                } else {
                                     epicTask = new EpicTask(jsonObject.get("name").getAsString(), jsonObject.get("description").getAsString(),
                                             Status.valueOf(jsonObject.get("status").getAsString()));
                                 }

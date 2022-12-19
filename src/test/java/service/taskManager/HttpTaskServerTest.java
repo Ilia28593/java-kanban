@@ -2,7 +2,9 @@ package service.taskManager;
 
 import api.HttpTaskServer;
 import api.KVServer;
+import com.google.gson.Gson;
 import model.Status;
+import model.Task;
 import model.Type;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -14,6 +16,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 import static model.Type.*;
 
@@ -223,16 +227,16 @@ public class HttpTaskServerTest {
     private HttpResponse<String> sendGetRequest(Type type, boolean toGetPrioritizedList,
                                                 boolean toGetParticularTask, int id, boolean toGetSubtasksForEpic) {
         URI url;
-        if(toGetPrioritizedList) {
+        if (toGetPrioritizedList) {
             url = URI.create("http://localhost:8082/tasks");
         } else {
             String typeForUrl = type.toString().toLowerCase();
-            if(!toGetParticularTask) {
+            if (!toGetParticularTask) {
                 url = URI.create(String.format("http://localhost:8082/tasks/%s", typeForUrl));
             } else {
                 url = URI.create(String.format("http://localhost:8082/tasks/%s/?id=%d", typeForUrl, id));
             }
-            if(toGetSubtasksForEpic) {
+            if (toGetSubtasksForEpic) {
                 url = URI.create(String.format("http://localhost:8082/tasks/subtask/epic/?id=%d", id));
             }
         }
@@ -253,7 +257,7 @@ public class HttpTaskServerTest {
     private HttpResponse<String> sendDeleteRequest(Type type, boolean deleteParticularTask, int id) {
         URI url;
         String typeForUrl = type.toString().toLowerCase();
-        if(!deleteParticularTask) {
+        if (!deleteParticularTask) {
             url = URI.create(String.format("http://localhost:8082/tasks/%s", typeForUrl));
         } else {
             url = URI.create(String.format("http://localhost:8082/tasks/%s?id=%d", typeForUrl, id));
@@ -274,10 +278,10 @@ public class HttpTaskServerTest {
 
     //NOTE: Request bodies were got from Insomnia
     private String getJsonPostRequestBody(Type type, boolean toBeRenewed, boolean isFirst) {
-        if(!toBeRenewed) {
+        if (!toBeRenewed) {
             switch (type) {
                 case TASK:
-                    if(isFirst) {
+                    if (isFirst) {
                         return "{\n" +
                                 "\t\"name\": \"T1\",\n" +
                                 "\t\"description\": \"TT1\",\n" +
@@ -315,7 +319,7 @@ public class HttpTaskServerTest {
                                 "}";
                     }
                 case EPIC:
-                    if(isFirst) {
+                    if (isFirst) {
                         return "{\n" +
                                 "\t\"name\": \"E1\",\n" +
                                 "\t\"description\": \"EE1\",\n" +
@@ -332,14 +336,10 @@ public class HttpTaskServerTest {
         } else {
             switch (type) {
                 case TASK:
-                    return "{\n" +
-                            "\t\"name\": \"T1\",\n" +
-                            "\t\"description\": \"TT1\",\n" +
-                            "\t\"status\": \"DONE\",\n" +
-                            "\t\"startTime\": \"04--11--2022 18:37\",\n" +
-                            "\t\"duration\": 120,\n" +
-                            "\t\"id\": 1\n" +
-                            "}";
+                    return new Gson().toJson(new Task("Режим салатики ^_^",
+                            "Оливье и селедка под шубой", Status.NEW,
+                            LocalDateTime.of(2022, 12, 31, 18, 0),
+                            Duration.ofMinutes(45)));
                 case SUBTASK:
                     return "{\n" +
                             "\t\"name\": \"S1\",\n" +

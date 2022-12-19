@@ -10,10 +10,10 @@ import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
+import static service.taskManager.Constants.PORT_KVSERVER;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class KVServer {
-    public static final int PORT = 8078;
     private final String apiToken;
     private final HttpServer server;
     private final Map<String, String> data = new HashMap<>();
@@ -21,7 +21,7 @@ public class KVServer {
 
     public KVServer() throws IOException {
         apiToken = generateApiToken();
-        server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
+        server = HttpServer.create(new InetSocketAddress("localhost", PORT_KVSERVER), 0);
         server.createContext("/register", this::register);
         server.createContext("/save", this::save);
         server.createContext("/load", this::load);
@@ -134,14 +134,14 @@ public class KVServer {
     }
 
     public void start() {
-        System.out.println("Запускаем сервер на порту " + PORT);
-        System.out.println("Открой в браузере http://localhost:" + PORT + "/");
+        System.out.println("Запускаем сервер на порту " + PORT_KVSERVER);
+        System.out.println("Открой в браузере http://localhost:" + PORT_KVSERVER + "/");
         System.out.println("API_TOKEN: " + apiToken);
         server.start();
     }
 
     public void stop() {
-        System.out.println("Останавливаем сервер на " + PORT);
+        System.out.println("Останавливаем сервер на " + PORT_KVSERVER);
         server.stop(0);
     }
 

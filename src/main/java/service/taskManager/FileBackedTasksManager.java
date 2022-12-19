@@ -16,8 +16,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static service.taskManager.Constants.DATE_TIME_FORMAT_FILE_BACKED_TASK_MANAGER;
+
 public class FileBackedTasksManager extends InMemoryTaskManager implements TaskManager {
-    private final static String DATE_TIME_FORMAT = "[dd.MM.yyyy]/[HH:mm]";
+
     private final String fileName;
 
     public FileBackedTasksManager(File file) {
@@ -90,7 +92,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     }
 
     private String dateTimeToString(LocalDateTime dateTime) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT_FILE_BACKED_TASK_MANAGER);
         return dateTime.format(formatter);
     }
 
@@ -109,7 +111,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     }
 
     private static LocalDateTime stringDateTime(String string) {
-        return LocalDateTime.parse(string, DateTimeFormatter.ofPattern(DATE_TIME_FORMAT));
+        return LocalDateTime.parse(string, DateTimeFormatter.ofPattern(DATE_TIME_FORMAT_FILE_BACKED_TASK_MANAGER));
     }
 
     private static void readContentFile(InMemoryTaskManager bufferKanban, String[] splitContent) {
