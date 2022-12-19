@@ -41,10 +41,6 @@ public class EpicTask extends Task {
         this.subtaskIds.add(subtaskIds.id);
     }
 
-    public void setFinishAllSubTask(Duration sumSubTaskDuration) {
-        this.finish = start.plusMinutes(durationMinutes.plusMinutes(sumSubTaskDuration.toMinutes()).toMinutes());
-    }
-
     @Override
     public String toString() {
         return "EpicTask{" +

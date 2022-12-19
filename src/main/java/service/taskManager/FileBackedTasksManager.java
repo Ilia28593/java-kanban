@@ -167,7 +167,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
                 SubTask subTask = new SubTask(values[2], values[4], Status.valueOf(values[3]), Integer.parseInt(values[0]));
                 subTask.setType(Type.SUBTASK);
                 bufferKanban.repository.getEpicTaskMap().get(Integer.parseInt(values[5])).addSubtask(subTask);
-                if(values.length>6) {
+                if (values.length > 6) {
                     subTask.setStart(stringDateTime(values[6]));
                     subTask.setDurationMinutes(Duration.ofMinutes(Long.parseLong(values[7])));
                 }

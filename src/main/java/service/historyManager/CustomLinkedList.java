@@ -2,14 +2,16 @@ package service.historyManager;
 
 import lombok.EqualsAndHashCode;
 import model.Task;
+import service.taskManager.Constants;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static service.taskManager.Constants.MAX_SIZE_HISTORY;
+
 public class CustomLinkedList {
-    private final int MAX_SIZE_HISTORY = 10;
     private final Map<Integer, Node<Task>> nodeMap = new HashMap<>();
     private Node<Task> first;
     private Node<Task> last;

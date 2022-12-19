@@ -13,7 +13,6 @@ public class Repository {
     private final Map<Integer, Task> taskMap = new HashMap<>();
     private final Map<Integer, EpicTask> epicTaskMap = new HashMap<>();
     private final Map<Integer, SubTask> subTaskMap = new HashMap<>();
-    private final Map<LocalDateTime, Integer> timeCompletedTask = new HashMap<>();
     private final TreeSet<Task> sortedTaskTree = new TreeSet<>(Comparator.comparing(Task::getStart));
     private final TreeSet<Task> waiteTimeTaskTree = new TreeSet<>(Comparator.comparing(Task::getType));
     private final TreeMap<LocalDateTime, Integer> checkFreeTime = new TreeMap<>(Comparator.comparing(LocalDateTime::getChronology));
@@ -27,10 +26,6 @@ public class Repository {
         } else{
             waiteTimeTaskTree.add(task);
         }
-    }
-
-    public void addTimeCompletedTaskMap(LocalDateTime localDateTime, int id) {
-        timeCompletedTask.put(localDateTime, id);
     }
 
     public void addSubtaskMap(SubTask subTask) {
@@ -58,7 +53,6 @@ public class Repository {
         subTaskMap.clear();
         taskMap.clear();
         sortedTaskTree.clear();
-        timeCompletedTask.clear();
         new Task(0);
     }
 

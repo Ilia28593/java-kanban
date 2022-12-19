@@ -10,14 +10,14 @@ import service.exception.ManagerException;
 import java.io.File;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class HttpTaskManager extends FileBackedTasksManager implements TaskManager{
+import static service.taskManager.Constants.FORMATTER_WRITER;
+
+public class HttpTaskManager extends FileBackedTasksManager implements TaskManager {
     static KVTaskClient client;
-    private static final String LOCAL_DATE_TIME_FORMATTER = "dd--MM--yyyy HH:mm";
 
     public HttpTaskManager(String urlToServer) {
         super(new File(urlToServer));
@@ -75,7 +75,7 @@ public class HttpTaskManager extends FileBackedTasksManager implements TaskManag
 
     private static List<Task> listOfTasksFromJson(String json) {
         List<Task> listOfTasks = new ArrayList<>();
-        if(!json.isEmpty()) {
+        if (!json.isEmpty()) {
             JsonElement jsonElement = JsonParser.parseString(json);
             JsonArray jsonArray = jsonElement.getAsJsonArray();
             for (JsonElement e : jsonArray) {
@@ -85,7 +85,7 @@ public class HttpTaskManager extends FileBackedTasksManager implements TaskManag
                 Type type = Type.valueOf(jsonObject.get("type").getAsString());
                 Status status = Status.valueOf(jsonObject.get("status").getAsString());
                 LocalDateTime startTime = LocalDateTime.parse(jsonObject.get("startTime").getAsString(),
-                        DateTimeFormatter.ofPattern(LOCAL_DATE_TIME_FORMATTER));
+                        FORMATTER_WRITER);
                 Duration duration = Duration.ofMinutes(jsonObject.get("duration").getAsLong());
                 Task task = new Task(name, description, status, startTime, duration);
                 listOfTasks.add(task);
@@ -96,7 +96,7 @@ public class HttpTaskManager extends FileBackedTasksManager implements TaskManag
 
     private static List<SubTask> listOfSubTasksFromJson(String json) {
         List<SubTask> listOfSubTasks = new ArrayList<>();
-        if(!json.isEmpty()) {
+        if (!json.isEmpty()) {
             JsonElement jsonElement = JsonParser.parseString(json);
             JsonArray jsonArray = jsonElement.getAsJsonArray();
             for (JsonElement e : jsonArray) {
@@ -107,7 +107,7 @@ public class HttpTaskManager extends FileBackedTasksManager implements TaskManag
                 Status status = Status.valueOf(jsonObject.get("status").getAsString());
                 int epicTaskId = jsonObject.get("epicTaskId").getAsInt();
                 LocalDateTime startTime = LocalDateTime.parse(jsonObject.get("startTime").getAsString(),
-                        DateTimeFormatter.ofPattern(LOCAL_DATE_TIME_FORMATTER));
+                        FORMATTER_WRITER);
                 Duration duration = Duration.ofMinutes(jsonObject.get("duration").getAsLong());
                 SubTask subTask = new SubTask(name, description, status, startTime, duration, epicTaskId);
                 listOfSubTasks.add(subTask);
@@ -118,7 +118,7 @@ public class HttpTaskManager extends FileBackedTasksManager implements TaskManag
 
     private static List<EpicTask> listOfEpicTasksFromJson(String json) {
         List<EpicTask> listOfEpicTasks = new ArrayList<>();
-        if(!json.isEmpty()) {
+        if (!json.isEmpty()) {
             JsonElement jsonElement = JsonParser.parseString(json);
             JsonArray jsonArray = jsonElement.getAsJsonArray();
             for (JsonElement e : jsonArray) {
@@ -136,7 +136,7 @@ public class HttpTaskManager extends FileBackedTasksManager implements TaskManag
 
     private static List<Integer> listOfIdsFromJson(String json) {
         List<Integer> listOfIdsFromHistory = new ArrayList<>();
-        if(!json.isEmpty()) {
+        if (!json.isEmpty()) {
             JsonElement jsonElement = JsonParser.parseString(json);
             JsonArray jsonArray = jsonElement.getAsJsonArray();
             for (JsonElement e : jsonArray) {
@@ -149,7 +149,7 @@ public class HttpTaskManager extends FileBackedTasksManager implements TaskManag
 
     private static void loadTasksToBuffer(InMemoryTaskManager bufferKanban) {
         String jsonTasksString = client.load("task");
-        if(!jsonTasksString.isEmpty()) {
+        if (!jsonTasksString.isEmpty()) {
             List<Task> listOfTasks = listOfTasksFromJson(jsonTasksString);
             for (Task task : listOfTasks) {
                 bufferKanban.addTask(new Task(task.getNameTask(), task.getTaskDetail(), task.getStatus(), task.getStart(),
@@ -157,18 +157,18 @@ public class HttpTaskManager extends FileBackedTasksManager implements TaskManag
             }
         }
         String jsonEpicString = client.load("epic");
-        if(!jsonEpicString.isEmpty()) {
+        if (!jsonEpicString.isEmpty()) {
             List<EpicTask> listOfEpicTasks = listOfEpicTasksFromJson(jsonEpicString);
             for (EpicTask epic : listOfEpicTasks) {
-                bufferKanban.addEpicTask(new EpicTask(epic.getNameTask(), epic.getTaskDetail(), epic.getStatus(),epic.getStart(),epic.getDurationMinutes()));
+                bufferKanban.addEpicTask(new EpicTask(epic.getNameTask(), epic.getTaskDetail(), epic.getStatus(), epic.getStart(), epic.getDurationMinutes()));
             }
         }
         String jsonSubtasksString = client.load("subtask");
-        if(!jsonSubtasksString.isEmpty()) {
+        if (!jsonSubtasksString.isEmpty()) {
             List<SubTask> listOfSubtasks = listOfSubTasksFromJson(jsonSubtasksString);
             for (SubTask subtask : listOfSubtasks) {
-                bufferKanban.addSubTask(subtask.getEpicId(),new SubTask(subtask.getNameTask(), subtask.getNameTask(),
-                        subtask.getStatus(), subtask.getStart(), subtask.getDurationMinutes(),subtask.getEpicId()));
+                bufferKanban.addSubTask(subtask.getEpicId(), new SubTask(subtask.getNameTask(), subtask.getNameTask(),
+                        subtask.getStatus(), subtask.getStart(), subtask.getDurationMinutes(), subtask.getEpicId()));
             }
         }
     }
@@ -176,7 +176,7 @@ public class HttpTaskManager extends FileBackedTasksManager implements TaskManag
     private static void loadHistoryToBuffer(InMemoryTaskManager bufferKanban) {
         String jsonHistoryString = client.load("history");
         List<Integer> listOfIdsFromHistory = listOfIdsFromJson(jsonHistoryString);
-        for(Integer id : listOfIdsFromHistory) {
+        for (Integer id : listOfIdsFromHistory) {
             if (bufferKanban.repository.getTaskMap().containsKey(id)) {
                 bufferKanban.getTaskById(id);
             } else if (bufferKanban.repository.getSubTaskMap().containsKey(id)) {

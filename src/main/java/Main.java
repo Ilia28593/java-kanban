@@ -14,13 +14,13 @@ public class Main {
     public static void main(String[] args) throws IOException {
 
         {
-            //Requests to HttpTaskManager via HttpTaskServer using Insomnia
             KVServer repoServer = null;
             try {
                 repoServer = new KVServer();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            assert repoServer != null;
             repoServer.start();
             HttpTaskServer taskServer = null;
             try {
@@ -30,7 +30,6 @@ public class Main {
             }
             assert taskServer != null;
             taskServer.start();
-            //NOTE: To test in Insomnia - please comment the following stop-lines.
             repoServer.stop();
             taskServer.stop();
         }
@@ -44,7 +43,7 @@ public class Main {
             }
             assert server != null;
             server.start();
-            //Serialization using the server
+
             HttpTaskManager kanban = new HttpTaskManager("http://localhost:8078");
 
             EpicTask driving = new EpicTask("Переезд", "Продумать план переезда", Status.NEW,
@@ -67,7 +66,7 @@ public class Main {
             kanban.getTaskById(5);
             kanban.getSubTaskById(3);
             kanban.getEpicTaskById(1);
-            //Deserialization using the same server
+
             System.out.println("List of tasks:");
             kanban.getListTask().forEach(System.out::println);
             System.out.println("List of epics:");
